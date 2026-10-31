@@ -313,6 +313,45 @@ body.forming .inbattle{display:none}
 #restart.arm,#fResetLv.arm{background:#e0686a;color:#000;border-color:#000}
 .battle{display:flex;flex-direction:column;gap:14px}
 @media (prefers-reduced-motion:reduce){.ccard{transition:none}.bar i{transition:none}.card.targetable,.ecard.targetable,.skill.special.ready{animation:none}}
+
+/* ===== celular deitado (tela baixa): campo de batalha à esquerda, time e botões à direita, sem rolar ===== */
+body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.land .wrap{max-width:none;gap:6px}
+.land header{flex-wrap:nowrap;gap:8px}
+.land h1 small{display:none}
+.land h1 b{font-size:13px;padding:3px 10px;box-shadow:3px 3px 0 var(--mintdk);border-bottom-width:2px;white-space:nowrap}
+.land .hdr-r{flex-wrap:nowrap;gap:6px;min-width:0}
+.land .round{font-size:10px;padding:3px 8px;white-space:nowrap}
+.land h1{flex-shrink:0}.land .vol input,.land .vol output{display:none}.land .btn{white-space:nowrap}
+.land .fbtn{padding:2px 7px 3px;max-width:150px;border-width:2px}.land .fn{font-size:10px}.land .fc{font-size:8px}.land .float{gap:4px 5px}
+.land .vol{padding:2px 8px 2px 4px;gap:5px;box-shadow:2px 2px 0 var(--shadow)}.land .vol button{font-size:9px;padding:2px 5px}.land .vol input{width:54px}.land .vol output{font-size:10px}
+.land .btn{font-size:10px;padding:4px 9px;border-width:2px;box-shadow:2px 2px 0 rgba(0,0,0,.25);letter-spacing:.06em}
+.land .rules,.land .battle .log,.land #hint{display:none}
+.land .battle{display:grid;grid-template-columns:minmax(0,1fr) 216px;grid-template-rows:auto minmax(0,1fr);gap:6px 8px;height:var(--avail,auto)}
+.land .stage{grid-row:1/3;grid-column:1;align-self:start;border-width:3px;box-shadow:3px 3px 0 rgba(0,0,0,.18)}
+.land .cbar{grid-column:2;grid-row:1;padding:4px 5px 5px;gap:3px;box-shadow:2px 2px 0 var(--shadow)}
+.land .cbar #who{width:100%}.land #who .tagb{font-size:9px;letter-spacing:.08em;padding:2px 8px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.land .cbar .ctrl{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%}.land .cbar .btn{padding:4px 2px;font-size:9px}.land #confirm{font-size:9px}
+.land .team{grid-column:2;grid-row:2;grid-template-columns:1fr;gap:4px;margin:0;overflow-y:auto;align-content:start;padding:0 4px 2px 0}
+.land .team .card{grid-template-columns:28px minmax(0,1fr);gap:6px;padding:3px 26px 3px 5px;box-shadow:2px 2px 0 var(--shadow);border-width:2px}
+.land .pf{width:26px;height:26px;border-width:2px;margin-left:0}.land .pf canvas{width:24px;height:24px}
+.land .team .sub,.land .team .bl{display:none}
+.land .info{gap:2px}.land .info .ctop{row-gap:2px;gap:3px}
+.land .nm{font-size:9px;padding:1px 6px;letter-spacing:.05em}.land .lv{font-size:7px;padding:0 4px}.land .lv b{font-size:9px}.land .cls{font-size:7px;padding:0 4px;border-width:1px}
+.land .team .bar{height:5px;border-width:1px;margin-inline:2px}.land .team .bar::after{display:none}
+.land .plan{font-size:8px;padding:0 5px;margin-top:1px}.land .tags{min-height:0;gap:3px}.land .tag{font-size:8px;line-height:11px;padding:0 4px}
+.land .ibtn{width:18px;height:18px;font-size:10px;right:3px;bottom:auto;top:3px}
+.land .turnc{right:4px;top:4px;padding:1px 8px}.land .turnc b{font-size:14px}
+.land .over{padding:6px}.land .over .box{gap:6px;max-height:100%;overflow:auto}.land .over h2{font-size:30px}.land .over p{margin:0;font-size:11px}.land .over .xpl span{font-size:9px}
+.land .einfo{font-size:10px;padding:6px 8px;left:4px;top:4px;width:min(300px,calc(100% - 8px));max-height:calc(100% - 8px)}
+.land .unl .ucard{width:96px;height:96px}.land .unl .ubox{gap:6px;padding:10px 16px}.land .unl b{font-size:16px}
+/* formação deitada */
+.land .fhead{gap:6px 10px}.land .fhead .tagb{font-size:10px;padding:3px 9px;letter-spacing:.1em}.land .fhead #fmsg{font-size:11px}
+.land .tmeter{padding:4px 10px;gap:4px 10px;box-shadow:2px 2px 0 var(--shadow)}.land .tmeter b{font-size:10px}.land .tmeter .tv{font-size:18px}.land .tmeter .tbar{height:11px}.land .tmeter .tr{font-size:10px}
+.land .slots{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.land .slot.res{grid-column:auto}
+.land .slot{grid-template-columns:30px minmax(0,1fr);gap:5px;padding:4px 6px;border-width:2px}.land .slot .pf{width:28px;height:28px}.land .slot .pf canvas{width:26px;height:26px}
+.land .slot .sl small{font-size:7px;letter-spacing:.04em}.land .slot .sl b{font-size:10px}.land .slot .sl em{font-size:8px}
+.land .roster{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
@@ -372,7 +411,14 @@ const BASECAM={x:960,y:708,z:1};
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const wc=document.createElement('canvas');wc.width=LW;wc.height=LH;const w=wc.getContext('2d');
-let DPR=1;function resize(){DPR=Math.min(2,devicePixelRatio||1);
+let DPR=1,LAND=false;function resize(){DPR=Math.min(2,devicePixelRatio||1);
+ // celular deitado: o campo ocupa a altura toda que sobra e mostra mais céu
+ LAND=innerWidth>innerHeight&&innerHeight<=540;document.body.classList.toggle('land',LAND);
+ if(LAND){const hd=document.querySelector('header'),av=Math.max(200,innerHeight-(hd.offsetTop+hd.offsetHeight)-6-7);document.body.style.setProperty('--avail',av+'px');
+  const w=cv.parentElement.clientWidth||600;NARROW=false;LH=Math.max(110,Math.min(300,Math.round(LW*(av-8)/w)));VH=LH*PX;wc.height=LH;cv.style.aspectRatio=`${LW}/${LH}`;
+  const oy=BASECAM.y;BASECAM.y=Math.round(FLOOR-.88*VH+VH/2);if(cam.y===oy||cam.y===undefined)cam.y=BASECAM.y;
+  const r=cv.getBoundingClientRect();cv.width=Math.round(r.width*DPR);cv.height=Math.round(r.width*LH/LW*DPR);return}
+ document.body.style.removeProperty('--avail');
  // tela estreita (celular): mais céu em cima, para caber os botões sem tampar os personagens
  NARROW=cv.parentElement.clientWidth<640;LH=NARROW?240:152;VH=LH*PX;wc.height=LH;cv.style.aspectRatio=`${LW}/${LH}`;
  const oy=BASECAM.y;BASECAM.y=Math.round(FLOOR-(NARROW?.86:.8)*VH+VH/2);if(cam.y===oy||cam.y===undefined)cam.y=BASECAM.y;
