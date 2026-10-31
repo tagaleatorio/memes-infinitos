@@ -1,0 +1,39 @@
+name: Gerar APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Montar o APK
+        run: gradle assembleRelease --no-daemon
+      - name: Renomear
+        run: cp app/build/outputs/apk/release/app-release.apk "Memes-Infinitos.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Memes-Infinitos-APK
+          path: Memes-Infinitos.apk
+      - name: Publicar na página de Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: Memes Infinitos 1.${{ github.run_number }}
+          body: Baixe o arquivo Memes-Infinitos.apk abaixo e abra no celular para instalar.
+          files: Memes-Infinitos.apk
+          make_latest: true

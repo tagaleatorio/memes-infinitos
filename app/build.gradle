@@ -1,0 +1,34 @@
+plugins { id 'com.android.application' }
+
+def run = (System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int
+
+android {
+    namespace 'com.memesinfinitos.rpg'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.memesinfinitos.rpg'
+        minSdk 24
+        targetSdk 34
+        versionCode run
+        versionName "1.${run}"
+    }
+    // chave fixa: assim cada APK novo instala por cima do antigo sem perder o progresso
+    signingConfigs {
+        fixa {
+            storeFile file('memes.keystore')
+            storePassword 'memesinfinitos'
+            keyAlias 'memes'
+            keyPassword 'memesinfinitos'
+        }
+    }
+    buildTypes {
+        release { signingConfig signingConfigs.fixa; minifyEnabled false }
+        debug { signingConfig signingConfigs.fixa }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies { implementation 'androidx.webkit:webkit:1.11.0' }
