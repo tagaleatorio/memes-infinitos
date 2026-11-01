@@ -483,7 +483,7 @@ const HEROES={
   {id:'consciencia',name:'Consciência',special:true,target:'enemy',power:200,desc:'Deixa um inimigo imóvel por 5 turnos, sofrendo dano cada vez maior a cada turno.'}]},
  xis:{name:'X',rarity:'raro',hp:2200,cls:'azul',weak:'amarelo',skills:[
   {id:'projx',name:'Projéteis X',cost:0,target:'allEnemies',power:70,desc:'Atira Xs giratórios em todos os inimigos.'},
-  {id:'troco',name:'Troco',cost:400,target:'ally',troco:true,desc:'Neste turno, se o X ou o aliado escolhido forem atacados, o dano é anulado e o X devolve com o dobro da força.'},
+  {id:'troco',name:'Troco',cost:400,target:'ally',troco:true,desc:'Neste turno, se o X ou o aliado escolhido forem atacados, o dano é anulado e o X devolve com 50% a mais de força.'},
   {id:'confusao',name:'Confusão',cost:650,target:'enemy',disable:true,desc:'Deixa um inimigo confuso e imóvel por 2 turnos.'},
   {id:'controle',name:'Controle',special:true,target:'enemy',disable:true,power:850,desc:'Um X prateado aparece na cara do inimigo: por 5 turnos ele ataca os outros inimigos. Se estiver sozinho, o X só causa muito dano.'}]},
  antking:{name:'Abacaxi Rei',rarity:'raro',hp:2100,cls:'verde',weak:'azul',skills:[
@@ -529,7 +529,7 @@ const HEROES={
  mrevj:{name:'M. Reverso Jovem',rarity:'ultimate',hp:5500,cls:'amarelo',weak:'azul',skills:[
   {id:'socoFendado',name:'Soco Fendado',cost:0,target:'enemy',power:240,splash:.5,desc:'Um soco que rasga o espaço: a fenda corre até os outros inimigos e dá metade do dano em cada um.'},
   {id:'passosReversos',name:'Passos Reversos',cost:300,target:'allEnemies',power:300,desc:'Some numa fenda e reaparece atrás de cada inimigo, um por um, com golpes de energia azul.'},
-  {id:'auge',name:'Auge',cost:600,target:'self',desc:'Desperta o auge do poder: dano x3 por 2 turnos e recupera 20% da vida.'},
+  {id:'auge',name:'Auge',cost:600,target:'self',desc:'Desperta o auge do poder: golpes normais com dano x2 por 2 turnos e recupera 20% da vida.'},
   {id:'colapso',name:'Colapso Multiversal',special:true,target:'allEnemies',power:2300,desc:'O cenário se parte em fendas, todos são puxados para o espaço, uma chuva de meteoros cai, ele soca cada inimigo atravessando o espaço e um meteoro colossal encerra tudo.'}]},
  melkti:{name:'Melk T Infinito',rarity:'ultimate',hp:6000,cls:'azul',weak:'vermelho',bond:'Esquiva infinita: desvia de metade dos ataques. Diferente do Melk T, ele nunca fica entediado.',skills:[
   {id:'cucuruto',name:'Cucuruto',cost:0,target:'enemy',power:240,desc:'Junta as mãos, pula e acerta a cabeça do inimigo com tudo: uma onda de choque verde-água arremessa ele longe.'},
@@ -539,7 +539,7 @@ const HEROES={
  destrx:{name:'Destruction X',rarity:'super',hp:3200,cls:'azul',weak:'verde',skills:[
   {id:'misseisAtomicos',name:'Mísseis atômicos',cost:0,target:'enemy',power:130,desc:'A armadura de nanotecnologia gera vários mísseis que acertam um inimigo.'},
   {id:'esferasAlvo',name:'Esferas Alvo',cost:550,target:'allEnemies',drones:3,desc:'Cria 3 esferas vermelhas voadoras: no começo de cada turno dos inimigos, por 3 turnos, cada uma atira um laser num inimigo aleatório.'},
-  {id:'revestimento',name:'Revestimento',cost:700,target:'self',desc:'Reveste o corpo de nanotecnologia: recebe só 1/3 do dano por 2 turnos.'},
+  {id:'revestimento',name:'Revestimento',cost:700,target:'self',desc:'Reveste o corpo de nanotecnologia: recebe só metade do dano por 2 turnos.'},
   {id:'transferencia',name:'Transferência',special:true,target:'enemy',power:950,desc:'Encosta no inimigo e passa parte da armadura para ele: muito dano e rouba vida. No fim, puxa a armadura de volta e finaliza com um soco energizado.'}]},
  duende:{name:'Duende',rarity:'comum',hp:1500,cls:'amarelo',weak:'azul',bond:'Rival do Gnomo: o Duende (Amarelo) bate forte no Gnomo, e o Gnomo (Azul) bate forte nele.',skills:[
   {id:'lancasDouradas',name:'Lanças Douradas',cost:0,target:'enemy',power:115,desc:'Um leque de lanças douradas surge acima dele e dispara num inimigo.'},
@@ -564,18 +564,18 @@ const HEROES={
  mvers:{name:'Multiversal',rarity:'super',hp:3700,cls:'azul',weak:'vermelho',skills:[
   {id:'energiaIndividual',name:'Energia individual',cost:0,target:'allEnemies',power:85,desc:'Gera uma bola de energia em cada inimigo e explode todas.'},
   {id:'regeneracao',name:'Regeneração',cost:550,target:'ally',heal:950,desc:'Cura bastante um aliado ou ele mesmo (950 de vida).'},
-  {id:'focoDef',name:'Foco',cost:750,target:'allAllies',guard:2,desc:'Amplifica a defesa da equipe em 200% (recebe 1/3 do dano) por 2 turnos.'},
-  {id:'protecaoTemporal',name:'Proteção temporal',special:true,target:'allAllies',desc:'Cria uma barreira amarela fechada em volta da equipe: todo ataque dos inimigos é anulado por 3 turnos.'}]},
+  {id:'focoDef',name:'Foco',cost:750,target:'allAllies',guard:2,desc:'Amplifica a defesa da equipe (recebe metade do dano) por 2 turnos.'},
+  {id:'protecaoTemporal',name:'Proteção temporal',special:true,target:'allAllies',desc:'Cria uma barreira amarela fechada em volta da equipe: os ataques dos inimigos causam 70% menos dano por 2 turnos.'}]},
  mrev:{name:'Multiversal Reverso',rarity:'super',hp:3800,cls:'amarelo',weak:'azul',skills:[
   {id:'socoReverso',name:'Soco reverso',cost:0,target:'enemy',power:135,splash:.35,desc:'Um soco que racha o espaço: a rachadura também dá dano nos outros inimigos.'},
   {id:'surpresa',name:'Surpresa',cost:400,target:'enemy',power:520,desc:'Teleporta para trás do inimigo e dá uma série de golpes de energia azul.'},
-  {id:'foco',name:'Foco',cost:750,target:'self',desc:'Amplifica a própria força em 200% (dano x3) por 2 turnos.'},
+  {id:'foco',name:'Foco',cost:750,target:'self',desc:'Amplifica a própria força: golpes normais com dano x2 por 2 turnos.'},
   {id:'massaUniversal',name:'Massa universal',special:true,target:'allEnemies',power:900,desc:'Fecha o punho: uma onda de impacto abre fendas por todo o cenário, e uma fenda gigante no céu solta um meteoro sobre os inimigos.'}]},
  copy:{name:'Copy',rarity:'comum',hp:1800,cls:'amarelo',weak:'verde',skills:[
   {id:'socoProprio',name:'Soco próprio',cost:0,target:'enemy',power:1,copyHit:true,desc:'Vira o inimigo atacado e dá o soco dele, 50% mais fraco que o original.'},
   {id:'espelho',name:'Espelho',cost:350,target:'self',desc:'Neste turno, se for atacado, o Copy leva o golpe mas devolve exatamente o mesmo ataque, com a mesma força.'},
   {id:'vidaSwap',name:'Vida Swap',cost:700,target:'enemy',desc:'Copia a porcentagem de vida de um inimigo para si (inimigo com vida cheia = Copy com vida cheia).'},
-  {id:'copiaPerfeita',name:'Cópia perfeita',special:true,target:'ally',copy:true,desc:'Vira um aliado por 3 turnos: ganha todos os poderes, a vida e a energia dele naquele momento. Só os olhos azul-claros entregam.'}]},
+  {id:'copiaPerfeita',name:'Cópia perfeita',special:true,target:'ally',copy:true,desc:'Vira um aliado por 3 turnos: ganha todos os poderes, a vida e a energia dele naquele momento. Só os olhos azul-claros entregam. O dano que levar como cópia continua quando ele volta.'}]},
  melkt:{name:'Melk T',rarity:'super',hp:4000,cls:'azul',weak:'vermelho',bond:'Esquiva tudo: nenhum ataque acerta o Melk T. Mas depois de 12 turnos em campo ele fica entediado e vai embora (conta como derrota dele).',skills:[
   {id:'peteleco',name:'Peteleco',cost:0,target:'enemy',power:175,desc:'Um peteleco que joga o inimigo para trás.'},
   {id:'raioDivisor',name:'Raio Divisor',cost:100,target:'allEnemies',power:150,desc:'Dispara raios que atingem cada inimigo individualmente, todos no mesmo instante.'},
@@ -1344,20 +1344,20 @@ function specialLocked(h){if(!G||h.side!=='hero')return false;if(h.buffs.invul>0
 function mult(src,tgt){return src.cls===tgt.cls?.5:(src.cls===tgt.weak?1.6:1)}
 function dealDamage(src,tgt,basePow,o={}){
  if(!tgt||tgt.dead)return 0;
- if(tgt.side==='hero'&&G&&G.timeShield&&src.side==='enemy'&&!tgt.dead){const[x0,y0]=chest(tgt);pop(x0,y0-60,'NULO','#ffd23f',10);SND.block();G.timeShield.hit=gnow();return 0}
- if(tgt.side==='hero'&&!tgt.dead&&dodges(tgt)){const[x0,y0]=chest(tgt);pop(x0+rand(-20,20),y0-60,'DESVIOU!','#3ff5d8',9);SND.dodge();
+  if(tgt.side==='hero'&&!tgt.dead&&dodges(tgt)){const[x0,y0]=chest(tgt);pop(x0+rand(-20,20),y0-60,'DESVIOU!','#3ff5d8',9);SND.dodge();
   if(!tgt.dodging&&G.actor!==tgt){tgt.dodging=true;const s0=tgt.ox;tween(110,p=>tgt.ox=s0-55*easeOut(p)).then(()=>tween(170,p=>tgt.ox=s0-55*(1-p))).then(()=>{tgt.ox=s0;tgt.dodging=false})}return 0}
  if(tgt.side==='hero'&&tgt.buffs.ghost>0){const[x0,y0]=chest(tgt);pop(x0,y0-60,'INTANGÍVEL','#e6e8f0',9);SND.whoosh();for(let i=0;i<8;i++)parts.push({x:x0+rand(-40,40),y:y0+rand(-60,60),vx:rand(-60,60),vy:-rand(20,80),l:.5,m:0,col:'#e6e8f0',sz:PX,g:0});return 0}
  if(tgt.side==='hero'&&tgt.buffs.invul>0){const[x0,y0]=chest(tgt);pop(x0,y0-60,'INVENCÍVEL','#ffe27a',9);SND.block();tgt.flash=.06;ring(x0,y0,'#ffe27a',30,110,260);return 0}
  const m=o.raw?1:mult(src,tgt);let d=basePow*m;
- if(!o.raw){if(src.side==='hero'&&src.buffs.atk>0)d*=1.4;if(src.side==='hero'&&src.buffs.armor>0)d*=1.5;if(src.side==='hero')d*=sibMult(src)*(src.lvMul||1)*(src.buffs.focus>0?3:1);if(tgt.side==='hero'&&tgt.buffs.armor>0)d*=.5;
- if(src.side==='enemy'&&src.atkDown>0)d*=.7;if(tgt.side==='hero'&&tgt.buffs.guard>0)d/=3;if(tgt.kind==='destrf')d*=.8;
+ if(!o.raw){if(src.side==='hero'&&src.buffs.atk>0)d*=1.4;if(src.side==='hero'&&src.buffs.armor>0)d*=1.5;if(src.side==='hero')d*=sibMult(src)*(src.lvMul||1)*(src.buffs.focus>0&&!src.curSp?2:1);if(tgt.side==='hero'&&tgt.buffs.armor>0)d*=.5;
+ if(src.side==='enemy'&&src.atkDown>0)d*=.7;if(tgt.side==='hero'&&G&&G.timeShield&&src.side==='enemy'){d*=.3;G.timeShield.hit=gnow();if(!o.small)pop(chest(tgt)[0]+30,chest(tgt)[1]-90,'BARREIRA -70%','#ffd23f',7)}
+ if(src.side==='enemy'&&G&&G.round>=20)d*=1+.1*(G.round-19);if(tgt.side==='hero'&&tgt.buffs.guard>0)d*=.5;if(tgt.kind==='destrf')d*=.8;
  if(src.powerOn)d*=2;if(src.side==='enemy'&&src.rage>0)d*=1.5;
  if(tgt.side==='enemy'&&tgt.defDown>0)d*=1.35;
  d=d*(.93+Math.random()*.14)}
  d=Math.max(1,Math.round(d));
  if(tgt.side==='hero'&&tgt.buffs.mirror&&src.side==='enemy'&&!o.raw&&!tgt.dead){const[x0,y0]=chest(tgt);pop(x0,y0-60,'ESPELHO!','#9fdcff',10);SND.block();ring(x0,y0,'#9fdcff',20,90,260);(G.counters||(G.counters=[])).push({by:tgt,en:src,dmg:d,mirror:true,ranged:!!src.ranged})}
- if(tgt.side==='hero'&&tgt.buffs.troco&&src.side==='enemy'&&!o.raw){const[x0,y0]=chest(tgt);pop(x0,y0-60,'ANULADO!',FXC.xis[0],10);SND.block();(G.counters||(G.counters=[])).push({by:tgt.buffs.troco,en:src,dmg:d*2});tgt.flash=.08;updateUI();return 0}
+ if(tgt.side==='hero'&&tgt.buffs.troco&&src.side==='enemy'&&!o.raw){const[x0,y0]=chest(tgt);pop(x0,y0-60,'ANULADO!',FXC.xis[0],10);SND.block();(G.counters||(G.counters=[])).push({by:tgt.buffs.troco,en:src,dmg:d*1.5});tgt.flash=.08;updateUI();return 0}
  let abs=0;
  if(tgt.side==='hero'){for(const k of['dawey','holo']){const sh=tgt.buffs[k];if(sh&&d>0){const a=Math.min(sh.hp,d);sh.hp-=a;d-=a;abs+=a;if(sh.hp<=0)tgt.buffs[k]=null}}}
  else if(tgt.eshield&&d>0){const sh=tgt.eshield,a=Math.min(sh.hp,d);sh.hp-=a;d-=a;abs+=a;if(sh.hp<=0)tgt.eshield=null}
@@ -1845,7 +1845,7 @@ const FX={
  async auge(u,_,s){const B='#3d6bff';u.pose='power';SND.charge(1);const st=gnow();
   const g=addPersist(()=>{const k=Math.min(1,(gnow()-st)/900);for(let i=0;i<4;i++){const a=Math.random()*7,d=rand(80,170)*(1-k*.4);parts.push({x:HX(u)+Math.cos(a)*d,y:HY(u)-90+Math.sin(a)*d,vx:-Math.cos(a)*d*3,vy:-Math.sin(a)*d*3,l:.28,m:0,col:Math.random()<.5?B:'#000',sz:PX,g:0})}rift(HX(u),HY(u)-100,220*k,Math.PI/2,k,9)});
   await sleep(900);g.ms=0;u.pose='raise';flashScreen(B,220);SND.boom(260);shake(10);ring(HX(u),HY(u)-90,B,20,200,480);ring(HX(u),HY(u)-90,'#000',14,150,420);
-  u.buffs.focus=2;u.buffs.focusNew=true;heal(u,Math.round(u.maxHp*.2));pop(HX(u),HY(u)-TOPE(u)-40,'AUGE · DANO x3 · 2T','#b9cbff',10);updateUI();await sleep(400);u.pose='idle'},
+  u.buffs.focus=2;u.buffs.focusNew=true;heal(u,Math.round(u.maxHp*.2));pop(HX(u),HY(u)-TOPE(u)-40,'AUGE · DANO x2 · 2T','#b9cbff',10);updateUI();await sleep(400);u.pose='idle'},
  async colapso(u,_,s){const B='#3d6bff';const en=aliveEnemies();u.whiteOL=true;await specialStart(u,s,en);await camTo(960,FLOOR-280,.8,350);
   // 1) o cenário se parte: fendas piscando por todo lado, dano constante
   u.pose='power';SND.boom(300);flashScreen('#ffffff',200);shake(18);const rifts=[];const rp=addPersist(()=>rifts.forEach(r=>rift(r.x,r.y,r.len,r.a,r.k,r.s)));
@@ -1920,7 +1920,7 @@ const FX={
  async revestimento(u,_,s){u.pose='power';SND.servo();const st=gnow();
   const g=addPersist(()=>{const k=Math.min(1,(gnow()-st)/600);for(let i=0;i<6;i++){const a=i/6*6.28+gnow()/300,r=110*(1-k)+30;w.fillStyle='#000';w.fillRect(sn(HX(u)+Math.cos(a)*r)-PX*2,sn(HY(u)-100+Math.sin(a)*r*1.3)-PX*2,PX*4,PX*4);w.fillStyle=i%2?'#fff06a':'#ff2a2a';w.fillRect(sn(HX(u)+Math.cos(a)*r)-PX,sn(HY(u)-100+Math.sin(a)*r*1.3)-PX,PX*2,PX*2)}});
   await sleep(620);g.ms=0;flashScreen('#fff06a',120);SND.shield();ring(HX(u),HY(u)-90,'#ff2a2a',20,120,380);u.buffs.guard=2;u.buffs.guardNew=true;
-  pop(HX(u),HY(u)-TOPE(u)-30,'REVESTIMENTO · DEFESA +200%','#fff06a',8);updateUI();await sleep(300);u.pose='idle'},
+  pop(HX(u),HY(u)-TOPE(u)-30,'REVESTIMENTO · DANO RECEBIDO ½','#fff06a',8);updateUI();await sleep(300);u.pose='idle'},
  async transferencia(u,t,s){const R='#ff2a2a',Y='#fff06a';await specialStart(u,s,[t]);await camTo((HX(u)+HX(t))/2,FLOOR-170,1.35,300);
   u.pose='dash';u.trailOn=true;SND.whoosh();await moveTo(u,t.x-95,t.y,160);u.trailOn=false;u.pose='punch';SND.metal();hit(HX(t)-30,HY(t)-100,Y);
   // a armadura passa para o inimigo
@@ -2030,11 +2030,11 @@ const FX={
   const g=addPersist(()=>{const k=Math.min(1,(gnow()-st)/600);for(let i=0;i<3;i++){const a=(gnow()/200+i*2.1),r=80*(1-k*.5);w.fillStyle=i%2?c:l;w.fillRect(sn(HX(t)+Math.cos(a)*r),sn(HY(t)-100+Math.sin(a)*r*1.3),PX*2,PX*2)}w.globalAlpha=.3*k;w.fillStyle=c;w.fillRect(sn(HX(t)-50),FLOOR-260,100,260);w.globalAlpha=1});
   await sleep(600);g.ms=0;ring(HX(t),HY(t)-90,c,20,120,380);heal(t,s.heal);log(`${u.name} regenerou ${t===u?'a si mesmo':t.name}.`);await sleep(300);u.pose='idle'},
  async focoDef(u,_,s){const[c,l]=FXC.mvers;u.pose='power';SND.charge(.6);await sleep(450);u.pose='raise';SND.shield();
-  for(const a of aliveHeroes()){a.buffs.guard=s.guard;a.buffs.guardNew=true;ring(HX(a),HY(a)-90,c,20,110,380);pop(HX(a),HY(a)-TOPE(a)-24,'DEFESA +200%',c,7)}
+  for(const a of aliveHeroes()){a.buffs.guard=s.guard;a.buffs.guardNew=true;ring(HX(a),HY(a)-90,c,20,110,380);pop(HX(a),HY(a)-TOPE(a)-24,'DANO RECEBIDO ½',c,7)}
   updateUI();await sleep(450);u.pose='idle'},
  async protecaoTemporal(u,_,s){const[c,l]=FXC.mvers;await specialStart(u,s,aliveHeroes().filter(a=>a!==u));await camTo(640,FLOOR-230,1.0,300);u.pose='raise';SND.mystic();
-  const z={turns:3,k:0,by:u};G.timeShield=z;SND.charge(1);await tween(900,p=>{z.k=easeOut(p);if(Math.random()<.7)parts.push({x:rand(300,980),y:FLOOR-rand(0,320),vx:0,vy:-rand(40,120),l:.5,m:0,col:Math.random()<.5?c:'#fff',sz:PX,g:0})});
-  flashScreen('#ffd23f',250);SND.shield();SND.chime();shake(5);pop(640,FLOOR-400,'PROTEÇÃO TEMPORAL · 3T','#ffd23f',11);log('A equipe está protegida: todo ataque inimigo será anulado por 3 turnos.');updateUI();
+  const z={turns:2,k:0,by:u};G.timeShield=z;SND.charge(1);await tween(900,p=>{z.k=easeOut(p);if(Math.random()<.7)parts.push({x:rand(300,980),y:FLOOR-rand(0,320),vx:0,vy:-rand(40,120),l:.5,m:0,col:Math.random()<.5?c:'#fff',sz:PX,g:0})});
+  flashScreen('#ffd23f',250);SND.shield();SND.chime();shake(5);pop(640,FLOOR-400,'PROTEÇÃO TEMPORAL · 2T','#ffd23f',11);log('A equipe está protegida: os ataques inimigos causam 70% menos dano por 2 turnos.');updateUI();
   await sleep(800);u.pose='idle';await specialEnd()},
  // ---------- MULTIVERSAL REVERSO ----------
  async socoReverso(u,t,s){const B='#3d6bff';await meleeIn(u,t);u.pose='charge';await sleep(110);u.pose='punch';SND.punch();SND.boom(120);const[hx,hy]=handAt(u);hit(hx,hy,B);shake(6);dealDamage(u,t,s.power);
@@ -2050,7 +2050,7 @@ const FX={
  async foco(u,_,s){const B='#3d6bff';u.pose='power';SND.charge(.9);const st=gnow();
   const g=addPersist(()=>{const k=Math.min(1,(gnow()-st)/800);for(let i=0;i<3;i++){const a=Math.random()*7,d=rand(70,150)*(1-k*.4);parts.push({x:HX(u)+Math.cos(a)*d,y:HY(u)-90+Math.sin(a)*d,vx:-Math.cos(a)*d*3,vy:-Math.sin(a)*d*3,l:.28,m:0,col:Math.random()<.5?B:'#000',sz:PX,g:0})}});
   await sleep(800);g.ms=0;u.pose='raise';flashScreen(B,180);SND.boom(180);shake(6);ring(HX(u),HY(u)-90,B,20,150,420);ring(HX(u),HY(u)-90,'#000',14,120,380);
-  u.buffs.focus=2;u.buffs.focusNew=true;pop(HX(u),HY(u)-TOPE(u)-40,'FORÇA +200% · 2T','#b9cbff',10);updateUI();await sleep(400);u.pose='idle'},
+  u.buffs.focus=2;u.buffs.focusNew=true;pop(HX(u),HY(u)-TOPE(u)-40,'FORÇA x2 · 2T','#b9cbff',10);updateUI();await sleep(400);u.pose='idle'},
  async massaUniversal(u,_,s){const B='#3d6bff';const en=aliveEnemies();await specialStart(u,s,en);await camTo(960,FLOOR-260,.85,350);
   // fecha o punho: onda de impacto
   u.pose='charge';SND.charge(.6);await sleep(450);u.pose='power';SND.boom(300);flashScreen('#ffffff',200);shake(16);const ox=HX(u),oy=HY(u)-90;
@@ -2369,12 +2369,12 @@ async function mirrorCounter(u,en,dmg,ranged){G.actor=u;const c=CLS[en.cls].c;pu
  dealDamage(u,en,dmg,{raw:true,noGain:true,big:true});log(`O Copy devolveu o mesmo ataque em ${en.name}!`);await sleep(250);if(!ranged)await backHome(u);puff(HX(u),HY(u)-90);u.disguise=null;u.pose='idle';G.actor=null}
 // Cópia perfeita: troca de identidade por 3 turnos
 const COPY_KEYS=['kind','name','cls','weak','maxHp','hp','skills','bored'];
-function startCopy(u,t){u.orig={};for(const k of COPY_KEYS)u.orig[k]=u[k];u.kind=t.kind;u.name=`Copy (${t.name})`;u.cls=t.cls;u.weak=t.weak;u.maxHp=t.maxHp;u.hp=t.hp;u.energy=t.energy;u.skills=HEROES[t.kind].skills;u.bored=0;u.copyForm=true;u.copyTurns=3;u.cp=null}
-function restoreCopy(u){if(!u.orig)return;const o=u.orig;for(const k of COPY_KEYS)u[k]=o[k];u.orig=null;u.copyForm=false;u.copyTurns=0;u.cp=null}
+function startCopy(u,t){u.cpStart=t.hp;u.cpMax=t.maxHp;u.orig={};for(const k of COPY_KEYS)u.orig[k]=u[k];u.kind=t.kind;u.name=`Copy (${t.name})`;u.cls=t.cls;u.weak=t.weak;u.maxHp=t.maxHp;u.hp=t.hp;u.energy=t.energy;u.skills=HEROES[t.kind].skills;u.bored=0;u.copyForm=true;u.copyTurns=3;u.cp=null}
+function restoreCopy(u){if(!u.orig)return;const o=u.orig,lost=Math.max(0,(u.cpStart||u.hp)-u.hp)/(u.cpMax||u.maxHp);for(const k of COPY_KEYS)u[k]=o[k];if(lost>0&&u.hp>0)u.hp=Math.max(1,Math.round(u.hp-lost*u.maxHp));u.orig=null;u.copyForm=false;u.copyTurns=0;u.cp=null}
 function endCopy(u){puff(HX(u),HY(u)-90);burst(HX(u),HY(u)-90,'#7ec8ff',16,320,.5);restoreCopy(u);pop(HX(u),HY(u)-TOPE(u)-30,'VOLTOU A SER O COPY','#7ec8ff',8);log('A cópia perfeita acabou: o Copy voltou ao normal.');buildCards()}
 // Troco: o X devolve o golpe anulado com o dobro da força
 async function xCounter(x,en,dmg){const c=FXC.xis[0];G.actor=x;x.pose='cast';SND.metal();pop(HX(x),HY(x)-TOP.xis-30,'TROCO!',c,9);await sleep(150);const[hx,hy]=handAt(x);const[tx,ty]=chest(en);
- await projectile(hx,hy,tx,ty,380,(px,py,p)=>drawX(px,py,30,p*18),60);explode(tx,ty,c,130);dealDamage(x,en,dmg,{raw:true,noGain:true,big:true});log(`O X devolveu o ataque em dobro em ${en.name}!`);await sleep(300);x.pose='idle';G.actor=null}
+ await projectile(hx,hy,tx,ty,380,(px,py,p)=>drawX(px,py,30,p*18),60);explode(tx,ty,c,130);dealDamage(x,en,dmg,{raw:true,noGain:true,big:true});log(`O X devolveu o ataque mais forte em ${en.name}!`);await sleep(300);x.pose='idle';G.actor=null}
 
 /* =================== TURNOS (planejado: escolhe tudo, depois confirma) =================== */
 async function newBattle(){hideInfo();
@@ -2426,7 +2426,7 @@ async function confirmTurn(){
   log(`${u.name} usou ${pl.skill.name}${t&&t!==u?' em '+t.name:''}.`);
   // Potência: o próximo ataque desse herói sai com o dobro de dano
   const pw=!!u.buffs.charged&&pl.skill.id!=='potencia';u.powerOn=pw;if(pw)pop(HX(u),HY(u)-TOPE(u)-30,'POTÊNCIA x2',FXC.melk2[0],8);
-  G.actor=u;await FX[pl.skill.id](u,t,pl.skill);G.actor=null;u.powerOn=false;if(pw)u.buffs.charged=false;if(G!==myG)return;if(!pl.skill.special&&!u.dead&&!specialLocked(u)){u.special=Math.min(100,u.special+spGain(pl.skill));updateUI()}await flushDeaths();if(G!==myG)return;
+  G.actor=u;u.curSp=!!pl.skill.special;await FX[pl.skill.id](u,t,pl.skill);u.curSp=false;G.actor=null;u.powerOn=false;if(pw)u.buffs.charged=false;if(G!==myG)return;if(!pl.skill.special&&!u.dead&&!specialLocked(u)){u.special=Math.min(100,u.special+spGain(pl.skill));updateUI()}await flushDeaths();if(G!==myG)return;
   u.pose='idle';u.flip=1;G.plans.delete(u.id);updateUI();await handleSubs();
   if(checkEnd())return;await sleep(180);
  }
@@ -2438,6 +2438,10 @@ async function enemyPhase(){const myG=G;G.phase='enemy';G.current=null;G.plans=n
   // Veneno: dano no começo do turno do inimigo
   if(en.poison){const ps=en.poison;ps.turns--;for(let i=0;i<10;i++)parts.push({x:HX(en)+rand(-30,30),y:HY(en)-rand(40,150),vx:0,vy:-rand(60,140),l:.6,m:0,col:Math.random()<.5?'#7cff5a':'#1d5e12',sz:PX,g:0});
    SND.spit();dealDamage(ps.src,en,ps.dmg,{noGain:true});log(`${en.name} sofre com o veneno.`);if(ps.turns<=0)en.poison=null;updateUI();await sleep(450);if(G!==myG)return;if(checkEnd())return;if(en.dead)continue}
+  // resistência a controle: um inimigo perde no máximo 2 turnos seguidos (chefão: 1); depois se solta e age
+  {const cc=en.ctrl||en.dizzy>0||en.consc||en.para>0||en.stun>0;
+   if(cc&&(en.lost||0)>=(en.boss?1:2)){en.ctrl=null;en.dizzy=0;en.consc=null;en.para=0;en.paraBy=null;en.stun=0;en.lost=0;pop(HX(en),HY(en)-TOPE(en)-40,'SE SOLTOU!','#ffffff',9);burst(HX(en),HY(en)-100,'#ffffff',14,320,.4);SND.whoosh();log(`${en.name} resistiu e se soltou do controle!`);updateUI();await sleep(400);if(G!==myG)return}
+   else en.lost=cc?(en.lost||0)+1:0}
   // Controle do X: ataca os próprios aliados; se ficar sozinho, o X explode
   if(en.ctrl){const cs=en.ctrl,others=aliveEnemies().filter(e=>e!==en);
    if(others.length){cs.turns--;const tg=others[Math.floor(Math.random()*others.length)];log(`${en.name} está sob Controle e ataca ${tg.name}!`);G.actor=en;await enemyAttack(en,tg);G.actor=null;if(G!==myG)return;
@@ -2475,6 +2479,7 @@ function endRound(){
  if(G.zeroOrb&&--G.zeroOrb.turns<=0){const z=G.zeroOrb;tween(400,p=>z.k=1-p).then(()=>{if(G.zeroOrb===z)G.zeroOrb=null});pop(ZPOS[0],ZPOS[1]-60,'A ESFERA SUMIU','#c9a8ff',7)}
  for(const e of G.enemies){if(e.rage>0)e.rage--;if(e.defDown>0)e.defDown--;if(e.atkDown>0)e.atkDown--;if(e.eshield&&--e.eshield.turns<=0)e.eshield=null}
  SND.energy();G.round++;log(`Rodada ${G.round}: +150 de energia para o time.`);
+ if(G.round>=20){pop(LW*PX/2,FLOOR-430,`FÚRIA DA TORRE · INIMIGOS +${(G.round-19)*10}% DE DANO`,'#ff5a5f',G.round===20?11:8);if(G.round===20){SND.growl();flashScreen('#ff5a5f',200);log('Fúria da torre: a luta demorou demais, os inimigos ficam mais fortes a cada rodada!')}}
  for(const h of aliveHeroes())pop(HX(h),HY(h)-TOPE(h)-30,'+150','#3f7cff',7);
  startPlayerTurn()}
 async function handleSubs(){
@@ -2535,7 +2540,7 @@ function effectsOf(e){const L=[],add=(c,n,d,col)=>{if(c)L.push({n,d,col})},b=e.b
  if(e.side==='hero'){
   add(b.dawey,b.dawey&&`DAWEYZINHOS · ${b.dawey.hp} · ${b.dawey.turns}T`,'Os daweyzinhos absorvem o dano que ele levaria.','#9fd0ff');
   add(b.holo,b.holo&&`${b.holo.name||'HOLOGRAMA'} · ${b.holo.hp} · ${b.holo.turns}T`,'Escudo que absorve dano.',b.holo&&b.holo.col||'#2fd3e6');
-  add(b.troco,'TROCO','Se for atacado neste turno, o dano é anulado e o X devolve com o dobro da força.','#d4dae3');
+  add(b.troco,'TROCO','Se for atacado neste turno, o dano é anulado e o X devolve com 50% a mais de força.','#d4dae3');
   add(b.charged,'POTÊNCIA x2','O próximo ataque causa o dobro de dano.','#ff3b3b');
   add(b.atk>0,`ATAQUE +40% · ${b.atk}T`,'Causa 40% a mais de dano.','#ff9b3d');
   add(b.armor>0,'ARMADURA HONRADA','+50% de ataque, recebe metade do dano e os ataques de energia custam metade. Dura a batalha toda.','#555');
@@ -2543,9 +2548,9 @@ function effectsOf(e){const L=[],add=(c,n,d,col)=>{if(c)L.push({n,d,col})},b=e.b
   add(b.ghost>0,`FANTASMA · ${b.ghost}T`,'Intangível: os golpes atravessam sem dano. Ataques custam metade da energia.','#cfd3dc');
   add(b.ghostMark,'MARCA FANTASMA','Se cair com o Dawey Fantasma vivo em campo, ele revive com metade da vida (uma vez).','#cfd3dc');
   add(G&&G.drones&&G.drones.by===e,G&&G.drones&&`ESFERAS ALVO · ${G.drones.turns}T`,'No começo de cada turno dos inimigos, as 3 esferas atiram lasers em inimigos aleatórios.','#ff2a2a');
-  add(b.guard>0,`DEFESA +200% · ${b.guard}T`,'Recebe só 1/3 do dano.','#ffd23f');
-  add(G&&G.timeShield,G&&G.timeShield&&`PROTEÇÃO TEMPORAL · ${G.timeShield.turns}T`,'A barreira do Multiversal anula todo ataque dos inimigos.','#ffd23f');
-  add(b.focus>0,`FOCO · ${b.focus}T`,'Força amplificada em 200%: causa o triplo de dano.','#3d6bff');
+  add(b.guard>0,`DEFESA · ${b.guard}T`,'Recebe só metade do dano.','#ffd23f');
+  add(G&&G.timeShield,G&&G.timeShield&&`PROTEÇÃO TEMPORAL · ${G.timeShield.turns}T`,'A barreira do Multiversal reduz em 70% o dano dos ataques inimigos.','#ffd23f');
+  add(b.focus>0,`FOCO · ${b.focus}T`,'Força amplificada: golpes normais causam o dobro de dano (o especial não é afetado).','#3d6bff');
   add(b.mirror,'ESPELHO','Se for atacado neste turno, leva o golpe mas devolve exatamente o mesmo ataque.','#9fdcff');
   add(e.copyTurns>0,`CÓPIA PERFEITA · ${e.copyTurns}T`,e.orig&&`É o Copy com a forma de ${HEROES[e.kind].name}. Depois volta a ser o Copy com a vida que tinha antes.`,'#7ec8ff');
   add(b.portal,'PORTAL REVIRÁVEL','Tiros contra ele neste turno são engolidos e devolvidos a quem atirou.','#2a4bd0');
@@ -2843,7 +2848,7 @@ new MutationObserver(syncTheme).observe(rootEl,{attributes:true,attributeFilter:
 themeBtn.addEventListener('click',()=>{setTheme(!isDark(),true);SND.click()});
 
 /* =================== AUTO (os heróis escolhem sozinhos) =================== */
-function expDmg(h,s,t){let d=(s.copyHit?t.atk*.5:(s.power||0))*mult(h,t)*sibMult(h)*(h.lvMul||1)*(h.buffs.focus>0?3:1);if(h.buffs.atk>0)d*=1.4;if(h.buffs.armor>0)d*=1.5;if(t.defDown>0)d*=1.35;if(h.buffs.charged&&s.id!=='potencia')d*=2;if(s.execute&&t.hp<t.maxHp*.5)d*=2;return d}
+function expDmg(h,s,t){let d=(s.copyHit?t.atk*.5:(s.power||0))*mult(h,t)*sibMult(h)*(h.lvMul||1)*(h.buffs.focus>0&&!s.special?2:1);if(h.buffs.atk>0)d*=1.4;if(h.buffs.armor>0)d*=1.5;if(t.defDown>0)d*=1.35;if(h.buffs.charged&&s.id!=='potencia')d*=2;if(s.execute&&t.hp<t.maxHp*.5)d*=2;return d}
 // força de ataque de um herói (para decidir em quem vale a pena colocar bônus)
 function atkPow(h){const en=Math.max(1,aliveEnemies().length);return Math.max(100,...h.skills.filter(s=>s.power).map(s=>s.power*(s.target==='allEnemies'?en*.8:1)*(s.special?.6:1)))}
 function aiChoose(h,taken){
