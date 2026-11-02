@@ -1058,7 +1058,7 @@ const ETYPES={
  brigao:{n:'Brigão',w:30,ranged:false,hp:1,atk:1,desc:'Ataca corpo a corpo.'},
  atirador:{n:'Atirador',w:30,ranged:true,hp:.95,atk:1,desc:'Atira de longe. Os tiros podem ser puxados pela esfera do Zero ou devolvidos pelo portal do Void.'},
  bruto:{n:'Bruto',w:14,ranged:false,hp:1.3,atk:.95,big:1.14,min:2,desc:'Corpo a corpo. Dá um pisão que acerta a equipe inteira (60% do ataque em cada um).'},
- curandeiro:{n:'Curandeiro',w:13,ranged:true,hp:.85,atk:.8,min:2,desc:'Atira de longe. Se algum aliado dele estiver abaixo de 70% de vida, cura em vez de atacar.'},
+ curandeiro:{n:'Curandeiro',w:13,ranged:true,hp:.85,atk:.8,min:2,desc:'Atira de longe. Se algum aliado estiver abaixo de 70% de vida, cura em vez de atacar, mas nunca dois turnos seguidos. Sozinho, só se cura abaixo de 50% de vida e a cada 3 turnos.'},
  escudeiro:{n:'Escudeiro',w:13,ranged:false,hp:1.15,atk:.9,min:3,desc:'Corpo a corpo. Em turnos alternados, protege o aliado mais ferido com um escudo de 2 turnos.'},
  chefao:{n:'Chefão',ranged:false,desc:'Muito forte e resistente. A cada 3 turnos usa o Terremoto, que acerta a equipe inteira.'}};
 function pickType(f){const L=Object.entries(ETYPES).filter(([k,t])=>t.w&&(t.min||1)<=f);let r=Math.random()*L.reduce((a,[,t])=>a+t.w,0);for(const[k,t]of L){if((r-=t.w)<0)return k}return'brigao'}
@@ -1140,6 +1140,8 @@ function randClone(){const pick=a=>a[Math.floor(Math.random()*a.length)];const c
  if(Math.random()<.35)acc.eyes=pick(['#ffffff','#ff2a2a','#ffe04a']);
  return{col,acc}}
 // ---------- X: o "X" prateado (projétil, marca e escudo do Troco) ----------
+// posição do rosto de qualquer personagem (acompanha o tamanho de chefões)
+function faceAt(e){const k=e.big||1;if(STICK.has(e.kind)){const h=joints(e.cp||PS.guard).head,tl=STICK_TALL[e.kind]||1;return[HX(e)+faceOf(e)*h[0]*k*(tl>1?.94:1),HY(e)+h[1]*k*tl]}return[HX(e),HY(e)-TOPE(e)*.75]}
 function drawX(x,y,r,a,col){col=col||FXC.xis[0];w.save();w.translate(x,y);w.rotate(a);w.lineCap='round';
  for(const[lw,c]of[[PX*3.4,'#000'],[PX*2,col]]){w.strokeStyle=c;w.lineWidth=lw;w.beginPath();w.moveTo(-r,-r);w.lineTo(r,r);w.moveTo(r,-r);w.lineTo(-r,r);w.stroke()}
  w.fillStyle='#fff';w.fillRect(sn(-r*.55),sn(-r*.55),PX,PX);w.restore()}
@@ -1219,9 +1221,35 @@ function rift(x,y,len,a,k,seed=0){if(k<=.01)return;const n=9,c=Math.cos(a),sn_=M
  const P=[...L,...R.reverse()];w.beginPath();P.forEach((p,i)=>i?w.lineTo(p[0],p[1]):w.moveTo(p[0],p[1]));w.closePath();w.fillStyle='#000';w.fill();w.strokeStyle='#3d6bff';w.lineWidth=PX;w.stroke();
  w.strokeStyle='#1f2ab0';w.lineWidth=PX*.8;for(let b=0;b<3;b++){const i=1+Math.floor(hash(b+40,seed)*(n-1)),p=L[i],ang=a+(hash(b+50,seed)-.5)*2.4+Math.PI/2*(b%2?1:-1),bl=(20+hash(b+60,seed)*40)*k;w.beginPath();w.moveTo(p[0],p[1]);w.lineTo(p[0]+Math.cos(ang)*bl*.5+rand(-3,3),p[1]+Math.sin(ang)*bl*.5);w.lineTo(p[0]+Math.cos(ang)*bl,p[1]+Math.sin(ang)*bl);w.stroke()}
  for(let i=0;i<4;i++){const u=hash(i+70,seed),cx=x+c*len*(u-.5)*k,cy=y+sn_*len*(u-.5)*k;w.fillStyle=hash(i+80,Math.floor(gnow()/120))<.5?'#ffffff':'#b9cbff';w.fillRect(sn(cx),sn(cy),PX,PX)}}
-function meteor(x,y,r){for(let i=0;i<6;i++){const d=r*(1.2+i*.55),s2=r*(.9-i*.12);w.fillStyle=['#fff3b0','#ffcc00','#ff9b3d','#ff5a2a','#c43a1a','#6b2a12'][i];w.beginPath();w.ellipse(x+d*.55,y-d*.85,s2,s2*.8,-.98,0,7);w.fill()}
- w.fillStyle='#000';w.beginPath();w.arc(x,y,r+PX*2,0,7);w.fill();w.fillStyle='#6b4a3a';w.beginPath();w.arc(x,y,r,0,7);w.fill();
- w.fillStyle='#4a3226';for(const[a,b,c]of[[-.3,-.2,.25],[.35,.15,.18],[-.1,.45,.15],[.4,-.4,.12]]){w.beginPath();w.arc(x+a*r,y+b*r,c*r,0,7);w.fill()}w.fillStyle='rgba(255,255,255,.25)';w.beginPath();w.arc(x-r*.35,y-r*.4,r*.25,0,7);w.fill()}
+// meteoro: rocha irregular com rachaduras de lava, cauda de fogo tremulando e brasas soltas (dx,dy = direção da queda)
+function meteor(x,y,r,dx=-.54,dy=.84){const t=gnow()/1000,L=Math.hypot(dx,dy)||1,ux=-dx/L,uy=-dy/L,px=-uy,py=ux,q=v=>Math.round(v/PX)*PX;
+ const poly=(pts,c)=>{w.fillStyle=c;w.beginPath();pts.forEach((p,i)=>i?w.lineTo(q(p[0]),q(p[1])):w.moveTo(q(p[0]),q(p[1])));w.closePath();w.fill()};
+ // brilho de calor
+ w.globalAlpha=.12;w.fillStyle='#ff7a1a';w.beginPath();w.arc(x+ux*r*.6,y+uy*r*.6,r*2,0,7);w.fill();w.globalAlpha=.16;w.fillStyle='#ffd23f';w.beginPath();w.arc(x,y,r*1.45,0,7);w.fill();w.globalAlpha=1;
+ // cauda de fogo em camadas, com bordas que tremulam
+ for(const[len,wid,col,sp]of[[6.2,1.25,'#7a1408',0],[5.4,1.12,'#d8341a',1],[4.3,.95,'#ff7a1a',2],[3.2,.74,'#ffc93a',3],[2,.5,'#fff6c8',4]]){const N=14,Lp=[],Rp=[];
+  for(let i=0;i<=N;i++){const k=i/N,al=r*.15+k*r*len,wd=r*wid*Math.pow(1-k,.75),wb=Math.sin(t*22+i*1.9+sp*2.3)*r*.16*k+Math.sin(t*13+i*.7+sp)*r*.08,cx=x+ux*al,cy=y+uy*al;
+   Lp.push([cx+px*(wd+wb),cy+py*(wd+wb)]);Rp.push([cx-px*(wd-wb*.6),cy-py*(wd-wb*.6)])}
+  poly([...Lp,...Rp.reverse()],col)}
+ // pedaços de chama que se soltam
+ for(let i=0;i<9;i++){const h=hash(Math.floor(t*14)+i*7,i),k=(h*1.1+t*1.7+i*.13)%1,al=r*(1.2+k*5.5),off=(hash(i,Math.floor(t*14))-.5)*r*1.6*(1-k*.4),sz=Math.max(PX,q(r*.18*(1-k)));
+  w.fillStyle=k<.3?'#ffe27a':k<.6?'#ff7a1a':'#c42a12';w.globalAlpha=1-k*.7;w.fillRect(q(x+ux*al+px*off),q(y+uy*al+py*off),sz,sz)}w.globalAlpha=1;
+ // rocha irregular (sempre a mesma forma para o mesmo tamanho)
+ const sd=Math.round(r),V=[];for(let i=0;i<11;i++){const a=i/11*Math.PI*2,rr=r*(.84+hash(i,sd)*.24);V.push([x+Math.cos(a)*rr,y+Math.sin(a)*rr])}
+ const ol=V.map(([vx,vy])=>{const a=Math.atan2(vy-y,vx-x),d=Math.hypot(vx-x,vy-y)+PX*2;return[x+Math.cos(a)*d,y+Math.sin(a)*d]});poly(ol,'#000');poly(V,'#5b3a2a');
+ // faces: sombra do lado da cauda, lado da frente aquecido
+ poly(V.map(([vx,vy])=>[vx+(x-vx)*.18+ux*r*.18,vy+(y-vy)*.18+uy*r*.18]),'#3e261a');
+ poly(V.map(([vx,vy])=>[x+(vx-x)*.62-ux*r*.22,y+(vy-y)*.62-uy*r*.22]),'#7a4e36');
+ const fr=[];for(let i=0;i<=8;i++){const a=Math.atan2(-uy,-ux)-1.25+i/8*2.5;fr.push([x+Math.cos(a)*r*.98,y+Math.sin(a)*r*.98])}for(let i=8;i>=0;i--){const a=Math.atan2(-uy,-ux)-1.25+i/8*2.5;fr.push([x+Math.cos(a)*r*.7,y+Math.sin(a)*r*.7])}poly(fr,'#d8541a');
+ // rachaduras de lava pulsando
+ const pl=.65+Math.sin(t*9)*.35;w.lineCap='square';w.lineJoin='miter';
+ for(const[wd,c]of[[Math.max(PX*2,r*.13),'#c42a12'],[Math.max(PX,r*.06),pl>.5?'#ffd23f':'#ff9b3d']]){w.strokeStyle=c;w.lineWidth=q(wd)||PX;w.beginPath();
+  for(const C of[[[-.55,-.1],[-.15,.05],[.1,-.25],[.45,-.15]],[[-.15,.05],[-.05,.45]],[[.1,-.25],[.2,-.6]],[[-.35,.45],[.25,.3],[.55,.4]]])C.forEach(([a,b2],i)=>{const vx=x+a*r,vy=y+b2*r;i?w.lineTo(q(vx),q(vy)):w.moveTo(q(vx),q(vy))});w.stroke()}
+ // crateras
+ w.fillStyle='#2e1a10';for(const[a,b2,c]of[[-.4,-.45,.14],[.42,.12,.11],[-.2,.62,.09]]){w.fillRect(q(x+a*r-c*r),q(y+b2*r-c*r),q(c*r*2)||PX,q(c*r*1.6)||PX)}
+ w.fillStyle='rgba(255,240,200,.35)';w.fillRect(q(x-r*.55),q(y-r*.55),q(r*.22)||PX,q(r*.12)||PX);
+ // brasas
+ if(Math.random()<.5)parts.push({x:x+ux*r*rand(.5,2)+px*rand(-r,r)*.6,y:y+uy*r*rand(.5,2)+py*rand(-r,r)*.6,vx:ux*rand(40,160),vy:uy*rand(40,160),l:.45,m:0,col:Math.random()<.5?'#ffd23f':'#ff5a2a',sz:PX,g:0})}
 // Melk T: raios verde-água e roxos, Ris e a Nave dos Ris
 function bolt(x0,y0,x1,y1,col,n=5,j=14){w.strokeStyle='#000';w.lineWidth=PX*2.2;const P=[[x0,y0]];for(let i=1;i<n;i++){const k=i/n;P.push([lerp(x0,x1,k)+rand(-j,j),lerp(y0,y1,k)+rand(-j,j)])}P.push([x1,y1]);
  const draw=()=>{w.beginPath();P.forEach((p,i)=>i?w.lineTo(p[0],p[1]):w.moveTo(p[0],p[1]));w.stroke()};draw();w.strokeStyle=col;w.lineWidth=PX;draw()}
@@ -1600,7 +1628,7 @@ const FX={
   hit(HX(t),HY(t)-140,c,true);if(!t.dead){t.dizzy=2;t.dizzyTxt='CONFUSO';pop(HX(t),HY(t)-TOPE(t)-60,'CONFUSO · 2 TURNOS','#ffe04a',9)}updateUI();await sleep(300);u.pose='idle'},
  async controle(u,t,s){const c=FXC.xis[0];await specialStart(u,s,[t]);u.pose='raise';
   const others=aliveEnemies().filter(e=>e!==t);await camTo((u.x+t.x)/2,FLOOR-230,1.05,300);
-  const fx0=HX(u),fy0=HY(u)-300,face=[HX(t)+(-1)*8,HY(t)-136];SND.metal();SND.charge(.6);
+  const fx0=HX(u),fy0=HY(u)-300,face=faceAt(t);SND.metal();SND.charge(.6);
   await projectile(fx0,fy0,face[0],face[1],750,(x,y,p)=>{drawX(x,y,lerp(130,16,easeOut(p)),p*14);if(Math.random()<.6)parts.push({x:x+rand(-40,40),y:y+rand(-40,40),vx:0,vy:0,l:.3,m:0,col:Math.random()<.5?c:'#fff',sz:PX,g:0})},120,easeIO);
   flashScreen('#ffffff',260);SND.boom(140);ring(face[0],face[1],c,10,180,420);t.ctrl={turns:5,src:u};updateUI();
   if(others.length){pop(HX(t),HY(t)-TOPE(t)-60,'CONTROLADO · 5 TURNOS',c,9);log(`${t.name} está sob Controle e vai atacar os próprios aliados.`);await sleep(700)}
@@ -2293,7 +2321,7 @@ async function enemyAttack(en,tgt){
 // cada tipo de capanga age do seu jeito
 async function enemyAct(en,tgt){en.turnN=(en.turnN||0)+1;G.actor=en;const al=aliveEnemies(),byHp=(a,b)=>a.hp/a.maxHp-b.hp/b.maxHp;
  try{
- if(en.type==='curandeiro'){const t=al.filter(e=>e.hp<e.maxHp*.7).sort(byHp)[0];if(t){await enemyHeal(en,t);return}}
+ if(en.type==='curandeiro'){if(en.healCd>0)en.healCd--;else{const alone=al.length===1,t=al.filter(e=>e.hp<e.maxHp*(alone?.5:.7)).sort(byHp)[0];if(t){en.healCd=alone?2:1;await enemyHeal(en,t);return}}}
  if(en.type==='escudeiro'&&en.turnN%2===1){const t=al.filter(e=>!e.eshield).sort(byHp)[0];if(t){await enemyShield(en,t);return}}
  if(en.type==='bruto'){await enemyStomp(en);return}
  if(en.heroBoss){await heroBossAct(en);return}
@@ -2301,7 +2329,7 @@ async function enemyAct(en,tgt){en.turnN=(en.turnN||0)+1;G.actor=en;const al=ali
  await enemyAttack(en,tgt)}finally{G.actor=null}}
 async function enemyHeal(en,t){en.pose='charge';SND.charge(.3);await sleep(250);en.pose='cast';const[hx,hy]=handAt(en),[tx,ty]=chest(t);
  if(t!==en)await projectile(hx,hy,tx,ty,300,(x,y)=>orb(x,y,14,'#4fd06a','#eaffef'),60);
- const a=Math.min(Math.round(en.atk*1.8),t.maxHp-t.hp);t.hp+=a;SND.heal();pop(tx,ty-60,'+'+a,'#4fd06a',10);for(let i=0;i<12;i++)parts.push({x:HX(t)+rand(-40,40),y:HY(t)-rand(0,150),vx:0,vy:-rand(80,160),l:.7,m:0,col:Math.random()<.5?'#4fd06a':'#fff',sz:PX,g:0});
+ const a=Math.min(Math.round(en.atk*(t===en?1.2:1.8)),t.maxHp-t.hp);t.hp+=a;SND.heal();pop(tx,ty-60,'+'+a,'#4fd06a',10);for(let i=0;i<12;i++)parts.push({x:HX(t)+rand(-40,40),y:HY(t)-rand(0,150),vx:0,vy:-rand(80,160),l:.7,m:0,col:Math.random()<.5?'#4fd06a':'#fff',sz:PX,g:0});
  log(`${en.name} curou ${t===en?'a si mesmo':t.name}.`);updateUI();await sleep(450);en.pose='guard'}
 async function enemyShield(en,t){en.pose='raise';SND.shield();const v=Math.round(en.atk*2.2);t.eshield={hp:v,turns:2};
  ring(HX(t),HY(t)-90*(t.big||1),'#7fd0ff',20,120,420);pop(HX(t),HY(t)-TOPE(t)-40,'ESCUDO '+v,'#7fd0ff',9);log(`${en.name} protegeu ${t===en?'a si mesmo':t.name} com um escudo.`);updateUI();await sleep(550);en.pose='guard'}
@@ -2448,7 +2476,7 @@ async function enemyPhase(){const myG=G;G.phase='enemy';G.current=null;G.plans=n
   if(en.ctrl){const cs=en.ctrl,others=aliveEnemies().filter(e=>e!==en);
    if(others.length){cs.turns--;const tg=others[Math.floor(Math.random()*others.length)];log(`${en.name} está sob Controle e ataca ${tg.name}!`);G.actor=en;await enemyAttack(en,tg);G.actor=null;if(G!==myG)return;
     if(cs.turns<=0){en.ctrl=null;if(!en.dead)pop(HX(en),HY(en)-TOPE(en)-60,'SAIU DO TRANSE','#ffffff',8)}updateUI();if(checkEnd())return;await sleep(160);continue}
-   const fx0=HX(en)-8,fy0=HY(en)-136;await addFx(450,p=>drawX(fx0,fy0,16+p*60,p*20));flashScreen('#ffffff',260);explode(fx0,fy0,FXC.xis[0],220);
+   const[fx0,fy0]=faceAt(en);await addFx(450,p=>drawX(fx0,fy0,16+p*60,p*20));flashScreen('#ffffff',260);explode(fx0,fy0,FXC.xis[0],220);
    dealDamage(cs.src,en,850*(.4+.12*cs.turns),{noGain:true,big:true});en.ctrl=null;log(`${en.name} ficou sozinho e o X explodiu.`);updateUI();await sleep(500);if(G!==myG)return;if(checkEnd())return;continue}
   // Confusão do X
   if(en.dizzy>0){en.dizzy--;const dz=en.dizzyTxt||'CONFUSO';log(`${en.name} está ${dz.toLowerCase()} e perdeu a vez.`);pop(HX(en),HY(en)-TOPE(en)-30,dz,'#ffe04a',8);SND.dizzy();updateUI();await sleep(650);if(G!==myG)return;continue}
@@ -2997,7 +3025,7 @@ function drawStatus(e,t){if(e.dead||e.alpha<.5)return;const x=HX(e),y=HY(e),top=
  }else{
   if(e.poison&&Math.random()<.18)parts.push({x:x+rand(-26,26),y:y-rand(30,150),vx:0,vy:-rand(40,90),l:.5,m:0,col:Math.random()<.5?'#7cff5a':'#1d5e12',sz:PX,g:0});
   if(e.dizzy>0)for(let i=0;i<3;i++){const a=t*5+i*2.09,sx=x+Math.cos(a)*34,sy=y-top+22+Math.sin(a)*9;w.fillStyle='#000';w.fillRect(sn(sx)-PX*2,sn(sy)-PX,PX*5,PX*3);w.fillStyle='#ffe04a';w.fillRect(sn(sx)-PX,sn(sy),PX*3,PX);w.fillRect(sn(sx),sn(sy)-PX,PX,PX*3)}
-  if(e.ctrl){w.globalAlpha=.45;w.strokeStyle=FXC.xis[0];w.lineWidth=PX;w.beginPath();w.ellipse(x-6,y-136,42+Math.sin(t*6)*4,14,0,0,7);w.stroke();w.globalAlpha=1;drawX(x-8,y-136,15,Math.sin(t*2)*.15)}
+  if(e.ctrl){const[fx,fy]=faceAt(e),k=e.big||1;w.globalAlpha=.45;w.strokeStyle=FXC.xis[0];w.lineWidth=PX;w.beginPath();w.ellipse(fx+2,fy-38*k,(42+Math.sin(t*6)*4)*k,14*k,0,0,7);w.stroke();w.globalAlpha=1;drawX(fx,fy,15*k,Math.sin(t*2)*.15)}
   if(e.consc){const c=FXC.universal[0];drawEye(x,y-top-84,.3,t);w.lineWidth=PX;for(let i=0;i<2;i++){const yy=y-30-i*70;w.strokeStyle=c;w.beginPath();w.ellipse(x,yy,46,13,0,0,7);w.stroke()}}
   if(e.stun>0){const c=FXC.omega[0];w.lineWidth=PX;for(let i=0;i<3;i++){const yy=y-50-i*42+Math.sin(t*5+i)*4,a=.18*Math.sin(t*2+i);w.strokeStyle='#000';w.beginPath();w.ellipse(x,yy+2,40,12,a,0,7);w.stroke();w.strokeStyle=c;w.beginPath();w.ellipse(x,yy,38,11,a,0,7);w.stroke()}}
   if(e.defDown>0){for(let i=0;i<2;i++){const yy=y-top+((t*70+i*36)%66);w.fillStyle='#000';w.beginPath();w.moveTo(x+46,yy-16);w.lineTo(x+74,yy-16);w.lineTo(x+60,yy);w.closePath();w.fill()}}
