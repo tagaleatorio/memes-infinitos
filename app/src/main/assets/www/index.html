@@ -272,7 +272,7 @@ canvas#cv{display:block;width:100%;height:auto;aspect-ratio:2/1;image-rendering:
 .cdet .cdbox{display:flex;flex-direction:column;gap:12px;width:min(340px,100%);max-height:100%}
 .cdet .cdcard{overflow:auto;max-height:calc(100vh - 110px)}.cdet .ccard{cursor:default}.cdet .ccard:hover{translate:none}
 .cdet .cdmsg{margin:0;padding:6px 10px;background:#000;color:#ffd23f;font:italic 700 11px/1.35 var(--mono)}.cdet .cdmsg[hidden]{display:none}
-.cdet .ctrl{display:flex;gap:10px;justify-content:space-between}.cdet .ctrl .btn{flex:1}
+.cdet .ctrl{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}.cdet .ctrl .btn{flex:1 1 30%;white-space:nowrap}.cdet .ctrl .btn[hidden]{display:none}
 .ccard{--cc:#000;position:relative;display:flex;flex-direction:column;background:var(--panel);border:3px solid var(--line);box-shadow:6px 6px 0 var(--shadow);cursor:pointer;min-width:0;transition:translate .12s}
 .ccard:hover{translate:0 -3px}
 .ccard:focus-visible{outline:3px solid var(--mintdk);outline-offset:3px}
@@ -354,7 +354,7 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .land .roster{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
 </style>
 
-<div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
+<div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
 <div class="unl" id="unl" hidden role="dialog" aria-label="Novo personagem"><div class="ubox"><small>NOVO PERSONAGEM!</small><div class="ucard"><canvas width="64" height="64"></canvas></div><b id="uName"></b><em id="uHow"></em><button class="btn main" id="uOk" type="button"><span>LEGAL!</span></button></div></div>
 <div class="wrap">
   <header>
@@ -1081,6 +1081,8 @@ const MAXLV=50,xpNeed=l=>60+l*40;
 function lvInfo(k){let x=XP[k]||0,l=1;while(l<MAXLV&&x>=xpNeed(l)){x-=xpNeed(l);l++}return{l,x,need:xpNeed(l)}}
 const lvOf=k=>lvInfo(k).l,lvHp=k=>Math.round(HEROES[k].hp*(1+.06*(lvOf(k)-1)));
 const isBossFloor=f=>f%5===0;
+// fúria da torre: os inimigos ficam mais fortes se a luta demora (andar de chefão demora mais, então começa depois)
+const furyStart=()=>G&&isBossFloor(G.floor)?30:20;
 // progressão: começa com 5 personagens; os outros são liberados por chefões da torre, evolução (nível) ou loja (moedas)
 const STARTERS=['melk','dawey','gnomo','klem','abacaxi'];
 const UNLOCK={
@@ -1351,7 +1353,7 @@ function dealDamage(src,tgt,basePow,o={}){
  const m=o.raw?1:mult(src,tgt);let d=basePow*m;
  if(!o.raw){if(src.side==='hero'&&src.buffs.atk>0)d*=1.4;if(src.side==='hero'&&src.buffs.armor>0)d*=1.5;if(src.side==='hero')d*=sibMult(src)*(src.lvMul||1)*(src.buffs.focus>0&&!src.curSp?2:1);if(tgt.side==='hero'&&tgt.buffs.armor>0)d*=.5;
  if(src.side==='enemy'&&src.atkDown>0)d*=.7;if(tgt.side==='hero'&&G&&G.timeShield&&src.side==='enemy'){d*=.3;G.timeShield.hit=gnow();if(!o.small)pop(chest(tgt)[0]+30,chest(tgt)[1]-90,'BARREIRA -70%','#ffd23f',7)}
- if(src.side==='enemy'&&G&&G.round>=20)d*=1+.1*(G.round-19);if(tgt.side==='hero'&&tgt.buffs.guard>0)d*=.5;if(tgt.kind==='destrf')d*=.8;
+ if(src.side==='enemy'&&G&&G.round>=furyStart())d*=1+.1*(G.round-furyStart()+1);if(tgt.side==='hero'&&tgt.buffs.guard>0)d*=.5;if(tgt.kind==='destrf')d*=.8;
  if(src.powerOn)d*=2;if(src.side==='enemy'&&src.rage>0)d*=1.5;
  if(tgt.side==='enemy'&&tgt.defDown>0)d*=1.35;
  d=d*(.93+Math.random()*.14)}
@@ -2313,7 +2315,7 @@ async function enemyStomp(en){const c=CLS[en.cls].c,heroes=aliveHeroes();if(!her
 function hbDmg(en,s){const p=s.power||Math.max(200,(s.cost||300)*.7);if(s.special)return en.atk*(s.target==='allEnemies'?1.5:2.8);return en.atk*Math.max(.6,Math.min(2.2,p/160))*(s.target==='allEnemies'?.65:1)}
 async function heroBossAct(en){const sk=HEROES[en.kind].skills;en.energy=Math.min(1000,(en.energy||0)+150);
  let s;if(en.turnN%3===0)s=sk.find(x=>x.special);
- if(!s){const ok=sk.filter(x=>!x.special&&(x.cost||0)<=en.energy&&!(x.heal&&!aliveEnemies().some(e=>e.hp<e.maxHp*.75)));const pricey=ok.filter(x=>x.cost).sort((a,b)=>b.cost-a.cost);s=pricey.length&&Math.random()<.6?pricey[0]:ok.find(x=>!x.cost)||ok[0]||sk[0];en.energy-=s.cost||0}
+ if(!s){if(en.healCd>0)en.healCd--;const ok=sk.filter(x=>!x.special&&(x.cost||0)<=en.energy&&!(x.heal&&(en.healCd>0||!aliveEnemies().some(e=>e.hp<e.maxHp*.75))));const pricey=ok.filter(x=>x.cost).sort((a,b)=>b.cost-a.cost);s=pricey.length&&Math.random()<.6?pricey[0]:ok.find(x=>!x.cost&&x.power)||ok.find(x=>!x.cost)||ok[0]||sk.find(x=>x.power&&!x.special)||sk[0];if(s.heal)en.healCd=3;en.energy-=s.cost||0}
  const[c,l]=FXC[en.kind]||[CLS[en.cls].c,'#ffffff'],heroes=aliveHeroes(),foes=aliveEnemies();if(!heroes.length)return;
  const lowH=heroes.slice().sort((a,b)=>a.hp-b.hp)[0],tgt=s.target==='enemy'?(Math.random()<.5?lowH:heroes[Math.floor(Math.random()*heroes.length)]):null;
  if(!s.special)pop(HX(en),HY(en)-TOPE(en)-40,s.name.toUpperCase()+'!',c,9);log(`${en.name} usou ${s.name}!`);
@@ -2321,8 +2323,8 @@ async function heroBossAct(en){const sk=HEROES[en.kind].skills;en.energy=Math.mi
  // efeitos de apoio: curar, proteger, fortalecer
  if(!s.power&&s.target!=='enemy'){en.pose='raise';SND.charge(.4);const st=gnow();const g=addPersist(()=>{const x=HX(en),y=HY(en),k=(gnow()-st)/500;w.strokeStyle=c;w.lineWidth=PX;for(let q=0;q<3;q++){const ph=(k*1.5+q/3)%1;w.beginPath();w.ellipse(x,y-ph*200,70*(1-ph*.4),12,0,0,7);w.stroke()}});await sleep(500);g.ms=0;
   const team=s.target==='allAllies'?foes:s.target==='ally'?[foes.slice().sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]]:[en];const hs=en.maxHp/HEROES[en.kind].hp;
-  for(const a of team){if(s.heal){const v=Math.min(Math.round(s.heal*hs*.6),a.maxHp-a.hp);a.hp+=v;SND.heal();pop(HX(a),HY(a)-TOPE(a)-20,'+'+v,'#4fd06a',10);for(let i=0;i<10;i++)parts.push({x:HX(a)+rand(-40,40),y:HY(a)-rand(0,150),vx:0,vy:-rand(80,160),l:.7,m:0,col:Math.random()<.5?'#4fd06a':'#fff',sz:PX,g:0})}
-   else if(s.guard||s.troco||s.id==='portalReviravel'||s.id==='zeroPositivo'){const v=Math.round(en.atk*2);a.eshield={hp:v,turns:2};SND.shield();ring(HX(a),HY(a)-90,c,20,120,380);pop(HX(a),HY(a)-TOPE(a)-20,'ESCUDO '+v,'#7fd0ff',8)}
+  for(const a of team){if(s.heal){const v=Math.min(Math.round(s.heal*hs*.6),Math.round(a.maxHp*.06),a.maxHp-a.hp);a.hp+=v;SND.heal();pop(HX(a),HY(a)-TOPE(a)-20,'+'+v,'#4fd06a',10);for(let i=0;i<10;i++)parts.push({x:HX(a)+rand(-40,40),y:HY(a)-rand(0,150),vx:0,vy:-rand(80,160),l:.7,m:0,col:Math.random()<.5?'#4fd06a':'#fff',sz:PX,g:0})}
+   else if(s.guard||s.troco||s.id==='portalReviravel'||s.id==='zeroPositivo'){const v=Math.round(en.atk*1.3);a.eshield={hp:v,turns:2};SND.shield();ring(HX(a),HY(a)-90,c,20,120,380);pop(HX(a),HY(a)-TOPE(a)-20,'ESCUDO '+v,'#7fd0ff',8)}
    else{a.rage=2;SND.buff();ring(HX(a),HY(a)-90,c,20,130,380);pop(HX(a),HY(a)-TOPE(a)-20,'DANO +50% · 2T','#ff9b3d',8)}}
   if(s.gain)en.energy=Math.min(1000,en.energy+s.gain);updateUI();await sleep(450);en.pose='guard';return}
  const d=hbDmg(en,s);
@@ -2335,7 +2337,7 @@ async function heroBossAct(en){const sk=HEROES[en.kind].skills;en.energy=Math.mi
  await sleep(300);en.pose='guard'}
 async function hbSpecial(en,s,c,l,tgt){const heroes=aliveHeroes();await specialStart(en,s,s.target==='enemy'?[tgt]:heroes);
  if(!s.power&&s.target!=='enemy'){ // especial de proteção (ex.: Proteção temporal): escudo forte em todo o lado inimigo
-  for(const a of aliveEnemies()){const v=Math.round(en.atk*3.2);a.eshield={hp:v,turns:3};ring(HX(a),HY(a)-90,c,20,150,420);pop(HX(a),HY(a)-TOPE(a)-20,'ESCUDO '+v,'#7fd0ff',9)}SND.shield();await sleep(700);en.pose='guard';await specialEnd();return}
+  for(const a of aliveEnemies()){const v=Math.round(en.atk*2);a.eshield={hp:v,turns:2};ring(HX(a),HY(a)-90,c,20,150,420);pop(HX(a),HY(a)-TOPE(a)-20,'ESCUDO '+v,'#7fd0ff',9)}SND.shield();await sleep(700);en.pose='guard';await specialEnd();return}
  const d=hbDmg(en,s),tg=s.target==='enemy'?[tgt]:heroes;await camTo(800,FLOOR-260,.85,320);en.pose='power';
  for(let k=0;k<5;k++){for(const h of tg){if(h.dead)continue;const[tx,ty]=chest(h);addFx(170,()=>{bolt(tx+rand(-120,120),FLOOR-1000,tx,ty,c,10,26);bolt(tx,FLOOR-1000,tx,ty,l,10,10)});hit(tx,ty,c,true);dealDamage(en,h,d*.4/5,{small:true})}SND.zap();shake(5);await sleep(170)}
  en.pose='cast';const[hx,hy]=chest(en),cx=tg.reduce((a,h)=>a+HX(h),0)/tg.length,O={x:hx,y:hy-80,r:0};const op=addPersist(()=>{if(O.r>0)orb(O.x,O.y,O.r,c,l)});SND.charge(1);await tween(450,p=>O.r=p*(tg.length>1?90:60));
@@ -2479,7 +2481,7 @@ function endRound(){
  if(G.zeroOrb&&--G.zeroOrb.turns<=0){const z=G.zeroOrb;tween(400,p=>z.k=1-p).then(()=>{if(G.zeroOrb===z)G.zeroOrb=null});pop(ZPOS[0],ZPOS[1]-60,'A ESFERA SUMIU','#c9a8ff',7)}
  for(const e of G.enemies){if(e.rage>0)e.rage--;if(e.defDown>0)e.defDown--;if(e.atkDown>0)e.atkDown--;if(e.eshield&&--e.eshield.turns<=0)e.eshield=null}
  SND.energy();G.round++;log(`Rodada ${G.round}: +150 de energia para o time.`);
- if(G.round>=20){pop(LW*PX/2,FLOOR-430,`FÚRIA DA TORRE · INIMIGOS +${(G.round-19)*10}% DE DANO`,'#ff5a5f',G.round===20?11:8);if(G.round===20){SND.growl();flashScreen('#ff5a5f',200);log('Fúria da torre: a luta demorou demais, os inimigos ficam mais fortes a cada rodada!')}}
+ {const fs=furyStart();if(G.round>=fs){pop(LW*PX/2,FLOOR-430,`FÚRIA DA TORRE · INIMIGOS +${(G.round-fs+1)*10}% DE DANO`,'#ff5a5f',G.round===fs?11:8);if(G.round===fs){SND.growl();flashScreen('#ff5a5f',200);log('Fúria da torre: a luta demorou demais, os inimigos ficam mais fortes a cada rodada!')}}}
  for(const h of aliveHeroes())pop(HX(h),HY(h)-TOPE(h)-30,'+150','#3f7cff',7);
  startPlayerTurn()}
 async function handleSubs(){
@@ -2803,10 +2805,13 @@ const cdetEl=document.getElementById('cdet'),cdMsg=document.getElementById('cdMs
 function openDet(k){detK=k;const h=HEROES[k],r=rarOf(k),maxHp=Math.max(...ROSTER.map(x=>lvHp(x)));
  cdetEl.querySelector('.cdcard').innerHTML=`<article class="ccard r-${r}${isUnl(k)?'':' locked'}" style="--cc:${CLS[h.cls].c}">${cardHead(k)}<div class="art"><canvas width="64" height="64"></canvas><span class="rar r-${r}"><span>${RARITY[r].star}${RARITY[r].n}</span></span></div>${cardBody(k,maxHp)}</article>`;
  cdMsg.hidden=true;syncDet();cdetEl.hidden=false;SND.pick();document.getElementById('cdClose').focus()}
-function syncDet(){if(detK==null)return;const k=detK,b=document.getElementById('cdPick'),u=UNLOCK[k],i=draft?draft.indexOf(k):-1;
+const trainCost=k=>40*lvOf(k);
+function syncDet(){if(detK==null)return;{const t=document.getElementById('cdTrain'),k=detK,c=trainCost(k),mx=lvOf(k)>=MAXLV;t.hidden=!isUnl(k);t.disabled=mx||PROG.coins<c;t.firstElementChild.textContent=mx?'NÍVEL MÁXIMO':`TREINAR +1 LV · ${c} MOEDAS`}const k=detK,b=document.getElementById('cdPick'),u=UNLOCK[k],i=draft?draft.indexOf(k):-1;
  b.hidden=false;b.firstElementChild.textContent=!isUnl(k)?(u.t==='shop'?(PROG.coins>=u.p?(buyArm===k?'TOCAR DE NOVO PARA COMPRAR':`COMPRAR · ${u.p} MOEDAS`):`FALTAM ${u.p-PROG.coins} MOEDAS`):'BLOQUEADO'):i>=0?'TIRAR DA EQUIPE':'COLOCAR NA EQUIPE';
  b.disabled=!isUnl(k)&&!(u.t==='shop'&&PROG.coins>=u.p)}
 function closeDet(){cdetEl.hidden=true;const k=detK;detK=null;const c=k&&rosterEl.querySelector(`[data-k="${k}"] .more`);if(c)c.focus()}
+document.getElementById('cdTrain').addEventListener('click',()=>{const k=detK;if(!k||!isUnl(k))return;const c=trainCost(k),L=lvInfo(k);if(L.l>=MAXLV||PROG.coins<c){SND.cancel();return}
+ PROG.coins-=c;saveProg();XP[k]=(XP[k]||0)+(L.need-L.x);saveXP();const ev=checkEvos();SND.confirm();buildRoster();renderFormation();openDet(k);cdMsg.textContent=`${HEROES[k].name} treinou e subiu para o nível ${lvOf(k)}! (-${c} moedas)`;cdMsg.hidden=false;if(ev.length)showUnlock(ev)});
 document.getElementById('cdClose').addEventListener('click',()=>{SND.click();closeDet()});
 cdetEl.addEventListener('click',ev=>{if(ev.target===cdetEl)closeDet()});
 addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!cdetEl.hidden)closeDet()});
