@@ -835,11 +835,13 @@ function buildStick(pose,face,o){
  const AR=o.armor?[].concat(o.armor):null;if(AR){drawArmorBody(b,cur,AR[0],AR[1]);if(AR[2]==='full')cur.legs.forEach(l=>{for(const[wd,c]of[[13,AR[1]],[8,AR[0]]]){b.strokeStyle=c;b.lineWidth=wd;b.lineCap='round';b.beginPath();b.moveTo(cur.hip[0],cur.hip[1]);b.lineTo(l[0][0],l[0][1]);b.lineTo(l[1][0],l[1][1]);b.stroke()}})}
  cur.arms.forEach(l=>seg([J(cur.sh),J(l[0]),J(l[1])],W2));
  if(o.mech)drawMechArm(b,cur);
- if(AR&&AR[2]==='full')cur.arms.forEach(([el,hd])=>{const fx=el[0]+(hd[0]-el[0])*.6,fy=el[1]+(hd[1]-el[1])*.6;for(const[wd,c]of[[12,AR[1]],[7,AR[0]]]){b.strokeStyle=c;b.lineWidth=wd;b.lineCap='round';b.beginPath();b.moveTo(cur.sh[0],cur.sh[1]);b.lineTo(el[0],el[1]);b.lineTo(fx,fy);b.stroke()}});
+ if(AR&&AR[2]==='full')cur.arms.forEach(([el,hd])=>{const fx=el[0]+(hd[0]-el[0])*.6,fy=el[1]+(hd[1]-el[1])*.6;for(const[wd,c]of[[12,AR[1]],[7,AR[0]]]){b.strokeStyle=c;b.lineWidth=wd;b.lineCap='round';b.beginPath();b.moveTo(cur.sh[0],cur.sh[1]);b.lineTo(el[0],el[1]);b.lineTo(fx,fy);b.stroke()}
+  // mãos de fora da armadura: punho na cor do corpo
+  b.fillStyle='#000';b.beginPath();b.arc(hd[0],hd[1],8,0,7);b.fill();b.fillStyle=o.color||'#000';b.beginPath();b.arc(hd[0],hd[1],5.5,0,7);b.fill()});
  if(AR)drawArmorPads(b,cur,AR[0],AR[1]);const HC=o.hcol||['#333333','#1d1d1d'];if(o.honor){drawArmorBody(b,cur,HC[0],'#000');cur.arms.forEach(l=>{b.strokeStyle='#000';b.lineWidth=12;b.beginPath();b.moveTo(l[0][0],l[0][1]);b.lineTo(l[1][0],l[1][1]);b.stroke();b.strokeStyle=HC[0];b.lineWidth=7;b.stroke()});drawArmorPads(b,cur,HC[0],'#000')}b.strokeStyle=b.fillStyle=o.color||'#000';
  if(o.honor)b.strokeStyle=b.fillStyle=HC[1];if(o.headCol)b.fillStyle=o.headCol;
  b.beginPath();const R=o.tall?25:27,[hx,hy]=cur.head;for(let i=0;i<=12;i++){const a=i/12*Math.PI*2,r=R+(hash(i%12+200,boil)-.5)*PX*1.2;const px=hx+Math.cos(a)*r,py=hy+Math.sin(a)*r;i?b.lineTo(px,py):b.moveTo(px,py)}b.fill();
- if(o.honor){b.strokeStyle=o.hcol&&o.hcol[2]?o.hcol[2].line:'#4a4a4a';b.lineWidth=3;b.beginPath();b.moveTo(hx-14,hy+14);b.lineTo(hx+26,hy+14);b.stroke();b.beginPath();b.moveTo(hx-2,hy-26);b.lineTo(hx-2,hy-14);b.stroke()}
+ if(o.honor&&!o.hcol){b.strokeStyle='#4a4a4a';b.lineWidth=3;b.beginPath();b.moveTo(hx-14,hy+14);b.lineTo(hx+26,hy+14);b.stroke();b.beginPath();b.moveTo(hx-2,hy-26);b.lineTo(hx-2,hy-14);b.stroke()}
  if(o.eyes){b.fillStyle=o.honor&&!o.dfin&&!o.hcol?'#000':o.eyes;const ey=hy-6;   // olhos vermelhos, inclinados para dentro (cara brava)
   b.beginPath();b.moveTo(hx-12,ey-5);b.lineTo(hx+5,ey+2);b.lineTo(hx+5,ey+13);b.lineTo(hx-12,ey+6);b.closePath();b.fill();
   b.beginPath();b.moveTo(hx+10,ey+2);b.lineTo(hx+26,ey-5);b.lineTo(hx+26,ey+6);b.lineTo(hx+10,ey+13);b.closePath();b.fill();b.fillStyle=o.color||'#000'}
