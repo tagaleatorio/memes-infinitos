@@ -362,6 +362,13 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .trow select{flex:1 1 150px}.trow select[data-tc]{flex:0 1 130px}.land .trow select{flex:1 1 80px}.land .trow select[data-tc]{flex:0 1 96px}.land .trow{flex-wrap:nowrap}.trow input[type=number]{width:62px}.trow.tq .btn{font-size:11px;padding:5px 10px}
 .trow select:focus-visible,.trow input:focus-visible{outline:3px solid var(--mint);outline-offset:1px}
 .land .tview{gap:6px}.land .tbox{padding:6px 8px;gap:5px}.land .trow select,.land .trow input{font-size:10px;padding:3px 4px}.land .trow>b,.land .trow>small{min-width:70px;font-size:9px}.land .tmsg{font-size:10px}
+.objs{position:absolute;right:10px;top:52px;z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:3px;pointer-events:none}.objs[hidden]{display:none}
+.objs b{font:italic 900 9px var(--mono);letter-spacing:.2em;color:#000;background:#ffd23f;padding:1px 8px;transform:skewX(-14deg)}
+.objs span{font:italic 700 10px var(--mono);letter-spacing:.06em;background:rgba(0,0,0,.78);color:#ffd23f;padding:1px 8px;transform:skewX(-14deg)}
+.objs span.fail{color:#8a8a8a;text-decoration:line-through}
+.land .objs{top:34px;right:4px;gap:2px}.land .objs b{font-size:7px}.land .objs span{font-size:8px;padding:0 6px}
+@media(max-width:640px){.objs{top:40px;right:6px}.objs span{font-size:8px}}
+.over .xpl span.star{color:#000;background:#ffd23f;border-color:#000}.over .xpl span.nostar{color:#8a8a8a;background:#1b1b1b;border-color:#555;text-decoration:line-through}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
@@ -408,6 +415,7 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
     <div class="banner" id="banner"><small>ATAQUE ESPECIAL</small><strong id="bName">DISPARO</strong><em id="bWho">MELK</em></div>
     <div class="float" id="float" hidden></div>
     <div class="turnc" id="turnc" aria-live="polite"><small>TURNO</small><b id="turnN">1</b></div>
+    <div class="objs" id="objs" aria-label="Objetivos bônus"></div>
     <div class="einfo" id="info" hidden role="dialog" aria-label="Efeitos"></div>
     <div class="over" id="over" hidden><div class="box"><div class="band"><h2 id="overT">VITÓRIA</h2></div><p id="overS"></p><div class="xpl" id="overXP"></div><div class="ctrl"><button class="btn" id="again" type="button"><span>ARRUMAR EQUIPE</span></button><button class="btn main" id="nextF" type="button"><span>PRÓXIMO ANDAR ▶</span></button></div></div></div>
   </div>
@@ -1172,6 +1180,11 @@ function lvInfo(k){let x=XP[k]||0,l=1;while(l<MAXLV&&x>=xpNeed(l)){x-=xpNeed(l);
 const lvOf=k=>lvInfo(k).l,lvHp=k=>Math.round(HEROES[k].hp*(1+.06*(lvOf(k)-1)));
 const isBossFloor=f=>f%5===0;
 // fúria da torre: os inimigos ficam mais fortes se a luta demora (andar de chefão demora mais, então começa depois)
+// objetivos bônus de cada andar (opcionais): dão moedas e XP extras; a 1ª vez em cada andar vale o dobro de moedas
+const OBJS=[{id:'safe',n:'SEM BAIXAS',d:'vencer sem perder nenhum personagem',k:.5,x:.25},{id:'t15',n:'ATÉ 15 TURNOS',d:'vencer em até 15 turnos',k:.3,x:.15},{id:'t8',n:'ATÉ 8 TURNOS',d:'vencer em até 8 turnos',k:.6,x:.25}];
+const objOk=id=>id==='safe'?!G.lost:id==='t15'?G.round<=15:G.round<=8;
+const starsOf=f=>(PROG.stars&&PROG.stars[f])||0;
+const starTxt=f=>{const m=starsOf(f);return OBJS.map((o,i)=>m&(1<<i)?'★':'☆').join('')};
 const furyStart=()=>G&&isBossFloor(G.floor)?30:20;
 // progressão: começa com 5 personagens; os outros são liberados por chefões da torre, evolução (nível) ou loja (moedas)
 const STARTERS=['melk','dawey','gnomo','klem','abacaxi'];
@@ -1501,7 +1514,7 @@ function dealDamage(src,tgt,basePow,o={}){
 }
 function heal(t,amt){SND.heal();const a=Math.min(amt,t.maxHp-t.hp);t.hp+=a;pop(HX(t),HY(t)-TOPE(t)-20,'+'+a,'#4fd06a',10);for(let i=0;i<14;i++)parts.push({x:HX(t)+rand(-50,50),y:HY(t)-rand(0,150),vx:0,vy:-rand(80,160),l:.8,m:0,col:Math.random()<.5?'#4fd06a':'#ffffff',sz:PX,g:0});updateUI()}
 async function flushDeaths(){if(!G)return;const d=G.enemies.filter(e=>e.dying&&!e.dead);for(const e of d){e.dying=false;kill(e)}if(d.length){updateUI();await sleep(500)}}
-function kill(e){if(e.dead)return;e.dying=false;SND.ko();e.dead=true;if(e.orig){restoreCopy(e);e.hp=0;buildCards()}if(e.side==='hero'&&(e.kind==='zero'||e.kind==='void')){const sb=[...G.heroes,...G.bench].find(x=>x.kind===(e.kind==='zero'?'void':'zero')&&!x.dead);if(sb){log(`${sb.name} ficou furioso: +50% de ataque!`);if(G.heroes.includes(sb)){pop(HX(sb),HY(sb)-TOPE(sb)-40,'FÚRIA +50%','#ff5a5f',10);ring(HX(sb),HY(sb)-90,'#ff5a5f',20,140,420)}}}e.pose=e.side==='enemy'?'dead':'heroDown';log(e.side==='enemy'?`${e.name} foi derrotado!`:`${e.name} caiu!`);
+function kill(e){if(e.dead)return;e.dying=false;if(e.side==='hero'&&G)G.lost=true;SND.ko();e.dead=true;if(e.orig){restoreCopy(e);e.hp=0;buildCards()}if(e.side==='hero'&&(e.kind==='zero'||e.kind==='void')){const sb=[...G.heroes,...G.bench].find(x=>x.kind===(e.kind==='zero'?'void':'zero')&&!x.dead);if(sb){log(`${sb.name} ficou furioso: +50% de ataque!`);if(G.heroes.includes(sb)){pop(HX(sb),HY(sb)-TOPE(sb)-40,'FÚRIA +50%','#ff5a5f',10);ring(HX(sb),HY(sb)-90,'#ff5a5f',20,140,420)}}}e.pose=e.side==='enemy'?'dead':'heroDown';log(e.side==='enemy'?`${e.name} foi derrotado!`:`${e.name} caiu!`);
  tween(450,p=>e.fall=p,easeOut).then(()=>{if(e.side==='enemy')sleep(500).then(()=>tween(500,p=>e.alpha=1-p));else tween(300,p=>e.alpha=1-p*.45)})}
 
 /* =================== ATAQUES =================== */
@@ -2627,7 +2640,7 @@ async function newBattle(){hideInfo();
  else{const lo=fl>=6?2:1,hi=fl<3?3:4;n=lo+Math.floor(Math.random()*(hi-lo+1));G.enemies=Array.from({length:n},(_,i)=>makeEnemy(rc(),i,n))}
  fx.length=0;parts.length=0;pops.length=0;props.length=0;Object.assign(cam,{x:BASECAM.x,y:BASECAM.y,z:1,shake:0});focus.alpha=0;focus.ents=[];
  document.getElementById('over').hidden=true;logEl.innerHTML='';buildCards();
- log(G.test?`Modo teste (força do andar ${fl}): nada desta luta é salvo.`:`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);
+ log(G.test?`Modo teste (força do andar ${fl}): nada desta luta é salvo.`:`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);if(!G.test)log('Bônus: vença sem baixas, em até 15 turnos e em até 8 turnos para ganhar moedas e XP extras.');
  G.heroes.forEach(h=>{h.alpha=0});G.enemies.forEach(e=>{e.ox=900;e.pose='run'});
  await Promise.all([...G.heroes.map((h,i)=>sleep(i*190).then(()=>entrance(h))),...G.enemies.map((e,i)=>sleep(i*70).then(()=>moveTo(e,e.x,e.y,750)))]);
  if(G!==myG)return;G.heroes.forEach(e=>e.pose='idle');G.enemies.forEach(e=>e.pose='guard');startPlayerTurn();
@@ -2706,7 +2719,7 @@ async function enemyPhase(){const myG=G;G.phase='enemy';G.current=null;G.plans=n
  endRound()}
 async function boredLeave(h){G.actor=h;h.pose='idle';pop(HX(h),HY(h)-TOPE(h)-40,'QUE TÉDIO...','#c48bff',11);log(`${h.name} ficou entediado e foi embora!`);SND.dizzy();await sleep(900);
  h.pose='raise';SND.charge(.5);const cx=HX(h),cy=HY(h)-100,st=gnow();const zz=addPersist(()=>{const k=Math.min(1,(gnow()-st)/550);for(let i=0;i<2+k*4;i++){const a=Math.random()*6.28,r=30+Math.random()*70;bolt(cx+Math.cos(a)*r*.3,cy+Math.sin(a)*r*.6,cx+Math.cos(a)*r,cy+Math.sin(a)*r*1.4,TCOL[i%2],3,8)}});
- await sleep(550);zz.ms=0;SND.teleport();flashScreen('#3ff5d8',180);burst(cx,cy,'#3ff5d8',18,380,.5);burst(cx,cy,'#8a5cff',14,320,.5);ring(cx,cy,'#3ff5d8',10,120,300);h.alpha=0;await sleep(400);h.dead=true;h.hp=0;h.left=true;h.buffs.ghostMark=false;G.actor=null;buildCards();updateUI()}
+ await sleep(550);zz.ms=0;SND.teleport();flashScreen('#3ff5d8',180);burst(cx,cy,'#3ff5d8',18,380,.5);burst(cx,cy,'#8a5cff',14,320,.5);ring(cx,cy,'#3ff5d8',10,120,300);h.alpha=0;await sleep(400);h.dead=true;h.hp=0;h.left=true;G.lost=true;h.buffs.ghostMark=false;G.actor=null;buildCards();updateUI()}
 function endRound(){
  for(const h of[...G.heroes,...G.bench]){h.buffs.troco=null;h.buffs.portal=null;h.buffs.mirror=null;
   if(h.copyTurns>0&&!h.dead&&--h.copyTurns<=0)endCopy(h);if(h.dead)continue;h.energy=Math.min(1000,h.energy+150);if(h.buffs.atk>0)h.buffs.atk--;for(const k of['dawey','holo']){const sh=h.buffs[k];if(sh&&--sh.turns<=0)h.buffs[k]=null}
@@ -2828,7 +2841,7 @@ function showInfo(e){if(!e){hideInfo();return}infoFor=e;const T=e.side==='enemy'
  <ul>${ef.length?ef.map(x=>`<li style="--c:${x.col}"><b>${x.n}</b>${x.d}</li>`).join(''):'<li><b>SEM EFEITOS</b>Nenhum efeito ativo agora.</li>'}</ul>`;
  infoEl.hidden=false;infoEl.querySelector('.ix').onclick=hideInfo}
 function hideInfo(){infoEl.hidden=true;infoFor=null}
-function awardXP(win){const f=G.floor,base=win?40+12*f:Math.round(12+3*f),inBattle=new Set([...G.heroes,...G.grave].map(h=>h.kind)),out=[];
+function awardXP(win,mul=1){const f=G.floor,base=(win?40+12*f:Math.round(12+3*f))*mul,inBattle=new Set([...G.heroes,...G.grave].map(h=>h.kind)),out=[];
  for(const k of TEAM.filter(Boolean)){const g=Math.round(base*(inBattle.has(k)?1:.5)),b=lvOf(k);XP[k]=(XP[k]||0)+g;out.push({k,g,b,a:lvOf(k)})}saveXP();return out}
 function endGame(win,quit){if(G.over)return;hideInfo();SND.music(false);setTimeout(()=>win?SND.win():SND.lose(),500);G.over=true;G.phase='over';G.current=null;G.pending=null;if(win)aliveHeroes().forEach(h=>h.pose='raise');
  const t=document.getElementById('overT');t.textContent=win?'VITÓRIA':quit?'DESISTÊNCIA':'DERROTA';t.classList.toggle('lose',!win);
@@ -2836,14 +2849,16 @@ function endGame(win,quit){if(G.over)return;hideInfo();SND.music(false);setTimeo
   document.getElementById('overXP').innerHTML=[...G.heroes,...G.grave.filter(h=>!G.heroes.includes(h))].map(h=>`<span>${h.name.toUpperCase()} · ${h.dead?'CAIU':Math.ceil(h.hp)+'/'+h.maxHp}</span>`).join('');
   const ag=document.getElementById('again'),nx=document.getElementById('nextF');nx.hidden=false;nx.firstElementChild.textContent='REPETIR TESTE ▶';ag.classList.remove('main');ag.firstElementChild.textContent='AJUSTAR TESTE';
   setTimeout(()=>{document.getElementById('over').hidden=false},800);log(win?'Vitória no teste!':'Fim do teste.');updateUI();return}
- const fl=G.floor,xp=awardXP(win);
+ const fl=G.floor,prevS=starsOf(fl),done=win?OBJS.map((o,i)=>({o,i})).filter(q=>objOk(q.o.id)):[],xp=awardXP(win,1+done.reduce((a,q)=>a+q.o.x,0));
  if(win){TOWER.best=Math.max(TOWER.best,fl);TOWER.floor=fl+1}else{TOWER.best=Math.max(TOWER.best,fl-1);TOWER.floor=Math.max(1,Math.floor((fl-1)/10)*10+1)}saveTower();
- const coins=win?(isBossFloor(fl)?2:1)*(15+4*fl):4+fl;PROG.coins+=coins;const newU=[];if(win&&G.heroBoss&&unlock(G.heroBoss))newU.push(G.heroBoss);newU.push(...checkEvos());saveProg();
+ const c0=win?(isBossFloor(fl)?2:1)*(15+4*fl):4+fl,bon=done.map(q=>{const first=!(prevS&(1<<q.i));return{...q,first,c:Math.round(c0*q.o.k*(first?2:1))}}),coins=c0+bon.reduce((a,q)=>a+q.c,0);PROG.coins+=coins;
+ if(done.length){PROG.stars=PROG.stars||{};PROG.stars[fl]=prevS|done.reduce((a,q)=>a|(1<<q.i),0)}const newU=[];if(win&&G.heroBoss&&unlock(G.heroBoss))newU.push(G.heroBoss);newU.push(...checkEvos());saveProg();
  document.getElementById('overS').textContent=win?`ANDAR ${fl} CONCLUÍDO NA RODADA ${G.round}`:(quit?`VOCÊ DESISTIU NO ANDAR ${fl}`:`SEU TIME CAIU NO ANDAR ${fl}`)+` · VOCÊ VOLTA PARA O ANDAR ${TOWER.floor}`;
- document.getElementById('overXP').innerHTML=newU.map(k=>`<span class="new">NOVO PERSONAGEM: ${HEROES[k].name.toUpperCase()}!</span>`).join('')+`<span class="coin">+${coins} MOEDAS · TOTAL ${PROG.coins}</span>`+xp.map(o=>`<span class="${o.a>o.b?'up':''}">${HEROES[o.k].name.toUpperCase()} +${o.g} XP${o.a>o.b?` · LV ${o.a}!`:''}</span>`).join('');
+ document.getElementById('overXP').innerHTML=newU.map(k=>`<span class="new">NOVO PERSONAGEM: ${HEROES[k].name.toUpperCase()}!</span>`).join('')+(win?OBJS.map((o,i)=>{const q=bon.find(x=>x.i===i);return q?`<span class="star">★ ${o.n} · +${q.c} MOEDAS${q.first?' (1ª VEZ x2)':''} · +${Math.round(o.x*100)}% XP</span>`:`<span class="nostar">☆ ${o.n}</span>`}).join(''):'')+`<span class="coin">+${coins} MOEDAS · TOTAL ${PROG.coins}</span>`+xp.map(o=>`<span class="${o.a>o.b?'up':''}">${HEROES[o.k].name.toUpperCase()} +${o.g} XP${o.a>o.b?` · LV ${o.a}!`:''}</span>`).join('');
  const ag=document.getElementById('again'),nx=document.getElementById('nextF');nx.hidden=!win;nx.firstElementChild.textContent=`PRÓXIMO: ANDAR ${TOWER.floor}${floorTag(TOWER.floor)} ▶`;ag.classList.toggle('main',!win);ag.firstElementChild.textContent=win?'ARRUMAR EQUIPE':'RECOMEÇAR ▶ MONTAR EQUIPE';
  for(const o of xp)if(o.a>o.b)log(`${HEROES[o.k].name} subiu para o nível ${o.a}!`);
  for(const k of newU)log(`${HEROES[k].name} foi liberado!`);
+ if(bon.length)log(`Objetivos cumpridos: ${bon.map(q=>q.o.n.toLowerCase()).join(', ')}.`);
  const myG=G;setTimeout(()=>{document.getElementById('over').hidden=false;if(newU.length)showUnlock(newU);
   // AUTO ligado: aperta sozinho o botão de montar a equipe do próximo andar
   if(AUTO)setTimeout(()=>{if(AUTO&&G===myG&&G.over&&!document.getElementById('over').hidden){if(win)nextFloor();else openFormation()}},2600)},800);log(win?'Vitória!':'Derrota...');updateUI()}
@@ -2872,6 +2887,7 @@ function planText(h){const p=G.plans.get(h.id);if(!p)return null;const n=G.order
  const tg=p.skill.target==='allEnemies'?'todos':p.skill.target==='allAllies'?'time':p.target?p.target.name:'';return `${n}º · ${p.skill.name}${tg?' → '+tg:''}`}
 let lastSig='';
 function updateUI(){if(!G)return;
+ {const oe=document.getElementById('objs');if(G.test){oe.hidden=true}else{oe.hidden=false;const sg=OBJS.map(o=>objOk(o.id)?1:0).join('')+starsOf(G.floor)+(G.over?'o':'');if(oe.dataset.sg!==sg){oe.dataset.sg=sg;const m=starsOf(G.floor);oe.innerHTML=`<b>BÔNUS</b>`+OBJS.map((o,i)=>`<span class="${objOk(o.id)?'ok':'fail'}">${m&(1<<i)?'★':'☆'} ${o.n}</span>`).join('')}}}
  document.getElementById('round').textContent=`${G.test?'TESTE':'ANDAR '+G.floor} · RODADA ${G.round}`;{const tn=document.getElementById('turnN');if(tn.textContent!==String(G.round)){tn.textContent=G.round;const tc=tn.parentElement;tc.classList.remove('bump');void tc.offsetWidth;tc.classList.add('bump')}}restartBtn.disabled=G.phase!=='player';if(restartBtn.disabled)resetQuit();
  for(const h of G.heroes){const el=teamEl.querySelector(`[data-id="${h.id}"]`);if(!el)continue;
   setBar(el,'hp',h.hp,h.maxHp);setBar(el,'en',h.energy,1000);setBar(el,'sp',h.special,100);
@@ -3001,8 +3017,8 @@ function renderTeamMeter(){const ks=draft.filter(Boolean),avg=teamPower(draft),f
  document.getElementById('tmTxt').innerHTML=`Recomendado para o andar ${f}${isBossFloor(f)?' (chefão)':''}: <b>${rec}</b>${ks.length?(avg>=rec?' · time pronto':avg>=rec*.85?' · quase lá':' · time abaixo do recomendado'):''} · nível médio ${lv.toFixed(1).replace('.',',')}`}
 function renderFormation(){
  renderTeamMeter();
- {const f=TOWER.floor;document.getElementById('fFloor').textContent=`PRÓXIMO: ANDAR ${f}${floorTag(f)}${TOWER.best?` · RECORDE ${TOWER.best}`:''}`;document.getElementById('fCoins').textContent=`MOEDAS ${PROG.coins}`;
-  const top=Math.max(1,TOWER.best+1),fs=document.getElementById('fFl');if(fs.options.length!==top){fs.innerHTML=Array.from({length:top},(_,i)=>{const n=i+1,hb=isBossFloor(n)&&bossHeroAt(n);return `<option value="${n}">ANDAR ${n}${hb?' · '+HEROES[hb].name.toUpperCase():isBossFloor(n)?' · CHEFÃO':''}${n===top&&TOWER.best?' · NOVO':''}</option>`}).join('')}fs.value=String(f);document.getElementById('flPrev').disabled=f<=1;document.getElementById('flNext').disabled=f>=top}
+ {const f=TOWER.floor;document.getElementById('fFloor').textContent=`PRÓXIMO: ANDAR ${f}${floorTag(f)} · ${starTxt(f)}${TOWER.best?` · RECORDE ${TOWER.best}`:''}`;document.getElementById('fCoins').textContent=`MOEDAS ${PROG.coins}`;
+  const top=Math.max(1,TOWER.best+1),fs=document.getElementById('fFl'),ssig=top+JSON.stringify(PROG.stars||{});if(fs.dataset.sig!==ssig){fs.dataset.sig=ssig;fs.innerHTML=Array.from({length:top},(_,i)=>{const n=i+1,hb=isBossFloor(n)&&bossHeroAt(n);return `<option value="${n}">ANDAR ${n}${hb?' · '+HEROES[hb].name.toUpperCase():isBossFloor(n)?' · CHEFÃO':''}${n===top&&TOWER.best?' · NOVO':' · '+starTxt(n)}</option>`}).join('')}fs.value=String(f);document.getElementById('flPrev').disabled=f<=1;document.getElementById('flNext').disabled=f>=top}
  if(FILT.o==='team')applyRosterView();
  slotsEl.innerHTML=[0,1,2,3,4].map(slotHTML).join('');
  slotsEl.querySelectorAll('.slot').forEach(el=>{const k=draft[+el.dataset.s];if(k)drawPortrait({kind:k},el.querySelector('canvas'))});
@@ -3079,7 +3095,7 @@ slotsEl.addEventListener('keydown',ev=>{const rm=ev.target.closest('[data-rm]');
 rosterEl.addEventListener('click',ev=>{const m=ev.target.closest('[data-more]');if(m){ev.stopPropagation();openDet(m.dataset.more);return}const c=ev.target.closest('.ccard');if(c)placeIn(c.dataset.k)});
 rosterEl.addEventListener('keydown',ev=>{if(ev.target.closest('[data-more]'))return;const c=ev.target.closest('.ccard');if(c&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();placeIn(c.dataset.k)}});
 // escolher o andar: qualquer um já alcançado (até o recorde + 1)
-function setFloor(n){const top=Math.max(1,TOWER.best+1);n=Math.max(1,Math.min(top,n));if(n===TOWER.floor)return;TOWER.floor=n;saveTower();SND.click();document.getElementById('fFl').innerHTML='';renderFormation();
+function setFloor(n){const top=Math.max(1,TOWER.best+1);n=Math.max(1,Math.min(top,n));if(n===TOWER.floor)return;TOWER.floor=n;saveTower();SND.click();document.getElementById('fFl').innerHTML='';document.getElementById('fFl').dataset.sig='';renderFormation();
  fmsg.textContent=n<top?`Rejogando o andar ${n}. Vencendo, você segue para o andar ${n+1}.`:`Andar ${n}: o mais alto que você já alcançou.`;fmsg.classList.add('warn')}
 document.getElementById('fFl').addEventListener('change',e=>setFloor(+e.target.value));
 document.getElementById('flPrev').addEventListener('click',()=>setFloor(TOWER.floor-1));
