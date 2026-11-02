@@ -352,6 +352,16 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .land .slot{grid-template-columns:30px minmax(0,1fr);gap:5px;padding:4px 6px;border-width:2px}.land .slot .pf{width:28px;height:28px}.land .slot .pf canvas{width:26px;height:26px}
 .land .slot .sl small{font-size:7px;letter-spacing:.04em}.land .slot .sl b{font-size:10px}.land .slot .sl em{font-size:8px}
 .land .roster{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.tview{display:flex;flex-direction:column;gap:12px}.tview .ctrl{margin-left:auto}
+.tagb.tnote{background:#ffd23f;color:#000;font-size:10px;letter-spacing:.08em}.tmsg{margin:0;font:700 13px var(--mono);color:var(--muted)}.tmsg.warn{color:#e0686a}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:760px){.tgrid{grid-template-columns:1fr}}
+.tbox{border:3px solid var(--line);background:var(--panel);padding:10px 12px;box-shadow:4px 4px 0 var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0}
+.tbox h3{margin:0 0 2px;font:italic 900 14px var(--mono);letter-spacing:.14em}
+.trow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:italic 700 11px var(--mono);letter-spacing:.06em}.trow>b,.trow>small{min-width:84px;color:var(--muted)}
+.trow select,.trow input{font:700 12px var(--mono);padding:5px 6px;border:2px solid var(--line);background:var(--btnbg);color:var(--text);min-width:0}
+.trow select{flex:1 1 150px}.trow select[data-tc]{flex:0 1 130px}.land .trow select{flex:1 1 80px}.land .trow select[data-tc]{flex:0 1 96px}.land .trow{flex-wrap:nowrap}.trow input[type=number]{width:62px}.trow.tq .btn{font-size:11px;padding:5px 10px}
+.trow select:focus-visible,.trow input:focus-visible{outline:3px solid var(--mint);outline-offset:1px}
+.land .tview{gap:6px}.land .tbox{padding:6px 8px;gap:5px}.land .trow select,.land .trow input{font-size:10px;padding:3px 4px}.land .trow>b,.land .trow>small{min-width:70px;font-size:9px}.land .tmsg{font-size:10px}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
@@ -362,9 +372,18 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
     <div class="hdr-r"><span class="round inbattle"><span id="round">RODADA 1</span></span><div class="vol"><button id="mus" type="button" aria-pressed="true"><span>♫ MÚSICA</span></button><input type="range" id="musVol" min="0" max="100" step="5" value="80" aria-label="Volume da música"><output id="musOut" for="musVol">80%</output></div><div class="vol"><button id="snd" type="button" aria-pressed="true"><span>EFEITOS</span></button><input type="range" id="sfxVol" min="0" max="100" step="5" value="100" aria-label="Volume dos efeitos"><output id="sfxOut" for="sfxVol">100%</output></div><button class="btn" id="theme" type="button"><span>TEMA: CLARO</span></button><button class="btn inbattle" id="restart" type="button"><span>DESISTIR</span></button></div>
   </header>
 
+  <section class="tview view" id="testv" hidden aria-label="Modo teste">
+    <div class="fhead"><span class="tagb"><span>MODO TESTE</span></span><span class="tagb tnote"><span>NADA É SALVO: NÍVEIS, MOEDAS E ANDARES CONTINUAM IGUAIS</span></span>
+      <div class="ctrl"><button class="btn" id="tExit" type="button"><span>◀ SAIR DO TESTE</span></button><button class="btn main" id="tGo" type="button"><span>COMEÇAR TESTE ▶</span></button></div></div>
+    <p class="tmsg" id="tMsg">Escolha qualquer personagem (mesmo os bloqueados), o nível de cada um e os inimigos. A força dos inimigos segue o andar escolhido.</p>
+    <div class="tgrid">
+      <div class="tbox"><h3>SEU TIME</h3><div id="tHeroes"></div><div class="trow tq"><button class="btn" type="button" id="tLvAll"><span>TODOS NO NÍVEL</span></button><input type="number" id="tLvAllV" min="1" max="50" value="20" aria-label="Nível para todos"><button class="btn" type="button" id="tMine"><span>USAR MEU TIME</span></button></div></div>
+      <div class="tbox"><h3>INIMIGOS</h3><div id="tEnemies"></div><label class="trow"><b>FORÇA DO ANDAR</b><input type="number" id="tFloor" min="1" max="99" value="10"></label></div>
+    </div>
+  </section>
   <section class="formation view" id="formation" hidden aria-label="Formação de equipe">
     <div class="fhead"><span class="tagb"><span>FORMAÇÃO DE EQUIPE</span></span><span class="tagb tower"><span id="fFloor"></span></span><span class="tagb coins"><span id="fCoins"></span></span><span class="flsel" role="group" aria-label="Escolher andar"><button type="button" class="fb" id="flPrev" aria-label="Andar anterior">◀</button><select id="fFl" aria-label="Andar da próxima batalha"></select><button type="button" class="fb" id="flNext" aria-label="Próximo andar">▶</button></span><span id="fmsg"></span>
-      <div class="ctrl"><button class="btn" id="fResetLv" type="button"><span>REINICIAR PROGRESSO</span></button><button class="btn main" id="fSave" type="button"><span>COMEÇAR BATALHA ▶</span></button></div></div>
+      <div class="ctrl"><button class="btn" id="fTest" type="button"><span>MODO TESTE</span></button><button class="btn" id="fResetLv" type="button"><span>REINICIAR PROGRESSO</span></button><button class="btn main" id="fSave" type="button"><span>COMEÇAR BATALHA ▶</span></button></div></div>
     <div class="tmeter" id="tmeter"><b>PODER DO TIME</b><span class="tv" id="tmV">0</span><div class="tbar"><i id="tmBar"></i><em id="tmRec"></em></div><span class="tr" id="tmTxt"></span></div>
     <div class="slots" id="slots"></div>
     <div class="rtools">
@@ -1053,7 +1072,7 @@ const IDLE={
 };
 const idlePose=(k,t,s)=>(IDLE[k]||IDLE.melk)(t,s);
 function base(){return{ox:0,oy:0,pose:'idle',alpha:1,flash:0,shake:0,hurtT:0,rot:0,rc:70,fall:0,flip:1,scale:1,dead:false,t:Math.random()*5,seed:Math.random()*9,cp:null,trail:[],trailOn:false}}
-function makeHero(k){const d=HEROES[k],lv=lvOf(k),mh=lvHp(k);return Object.assign(base(),{id:'h'+(UID++),side:'hero',kind:k,name:d.name,cls:d.cls,weak:d.weak,maxHp:mh,hp:mh,energy:250,special:0,level:lv,lvMul:1+.05*(lv-1),skills:d.skills,x:0,y:FLOOR,acted:false,buffs:{atk:0,dawey:null,holo:null}})}
+function makeHero(k,lvT){const d=HEROES[k],lv=lvT||lvOf(k),mh=lvT?Math.round(d.hp*(1+.06*(lv-1))):lvHp(k);return Object.assign(base(),{id:'h'+(UID++),side:'hero',kind:k,name:d.name,cls:d.cls,weak:d.weak,maxHp:mh,hp:mh,energy:250,special:0,level:lv,lvMul:1+.05*(lv-1),skills:d.skills,x:0,y:FLOOR,acted:false,buffs:{atk:0,dawey:null,holo:null}})}
 const ETYPES={
  brigao:{n:'Brigão',w:30,ranged:false,hp:1,atk:1,desc:'Ataca corpo a corpo.'},
  atirador:{n:'Atirador',w:30,ranged:true,hp:.95,atk:1,desc:'Atira de longe. Os tiros podem ser puxados pela esfera do Zero ou devolvidos pelo portal do Void.'},
@@ -1062,13 +1081,13 @@ const ETYPES={
  escudeiro:{n:'Escudeiro',w:13,ranged:false,hp:1.15,atk:.9,min:3,desc:'Corpo a corpo. Em turnos alternados, protege o aliado mais ferido com um escudo de 2 turnos.'},
  chefao:{n:'Chefão',ranged:false,desc:'Muito forte e resistente. A cada 3 turnos usa o Terremoto, que acerta a equipe inteira.'}};
 function pickType(f){const L=Object.entries(ETYPES).filter(([k,t])=>t.w&&(t.min||1)<=f);let r=Math.random()*L.reduce((a,[,t])=>a+t.w,0);for(const[k,t]of L){if((r-=t.w)<0)return k}return'brigao'}
-function makeEnemy(cls,i,n,o={}){const f=TOWER.floor,hm={1:2,2:1.4,3:1.15,4:1}[n]||1,am={1:1.6,2:1.25,3:1.1,4:1}[n]||1,hpM=1+.18*(f-1),atM=1+.1*(f-1);
+function makeEnemy(cls,i,n,o={}){const f=o.floor||TOWER.floor,hm={1:2,2:1.4,3:1.15,4:1}[n]||1,am={1:1.6,2:1.25,3:1.1,4:1}[n]||1,hpM=1+.18*(f-1),atM=1+.1*(f-1);
  const type=o.type||pickType(f),T=ETYPES[type],boss=type==='chefao',L=n>1?' '+'ABCD'[i]:'';
  const hp=boss?Math.round(4300*hpM*(n===1?1.35:1)/10)*10:Math.round((1400+Math.random()*400)*hm*hpM*T.hp/10)*10;
  const atk=boss?Math.round(215*atM*(n===1?1.25:1)):Math.round((140+Math.random()*50)*am*atM*T.atk);
  return Object.assign(base(),{id:'e'+(UID++),side:'enemy',kind:'enemy',type,boss,big:boss?1.55:(T.big||1),pose:'guard',name:`${T.n} ${CLS[cls].n}${L}`,label:`${T.n}${L}`,cls,weak:ENEMY_WEAK[cls],maxHp:hp,hp,shownHp:hp,atk,ranged:T.ranged,
   hat:boss?null:type==='curandeiro'?'#f4f4f4':type==='escudeiro'?null:(Math.random()<.5?'#111':null),beard:false,x:o.x||ENEMY_X[i],y:FLOOR,defDown:0,buffs:{atk:0}})}
-function makeBossHero(k,n){const d=HEROES[k],e=makeEnemy(d.cls,0,n,{type:'chefao',x:1120});const hp=Math.round(e.maxHp*1.1/10)*10;
+function makeBossHero(k,n,o={}){const d=HEROES[k],e=makeEnemy(d.cls,o.i||0,n,Object.assign({type:'chefao',x:1120},o));const hp=Math.round(e.maxHp*1.1/10)*10;
  return Object.assign(e,{kind:k,heroBoss:true,big:1,energy:250,name:d.name,label:d.name,weak:d.weak,hat:null,beard:false,maxHp:hp,hp,shownHp:hp})}
 function placeHero(h,i){h.x=HERO_X[i];h.y=FLOOR;h.slot=i}
 const TOPE=e=>TOP[e.kind]*(e.big||1);
@@ -2409,16 +2428,20 @@ async function xCounter(x,en,dmg){const c=FXC.xis[0];G.actor=x;x.pose='cast';SND
 /* =================== TURNOS (planejado: escolhe tudo, depois confirma) =================== */
 async function newBattle(){hideInfo();
  SND.music(true);const myG={round:1,phase:'busy',heroes:[],bench:[],enemies:[],grave:[],current:null,pending:null,over:false,plans:new Map(),order:[],floor:TOWER.floor};G=myG;
- G.heroes=TEAM.slice(0,4).map((k,i)=>{if(!k)return null;const h=makeHero(k);placeHero(h,i);return h}).filter(Boolean);
- G.bench=TEAM[4]?[makeHero(TEAM[4])]:[];
+ const T=TESTCFG;if(T){G.test=true;G.floor=T.floor}
+ G.heroes=(T?T.heroes:TEAM).slice(0,4).map((k,i)=>{if(!k)return null;const h=makeHero(k,T?T.lv[i]:0);placeHero(h,i);return h}).filter(Boolean);
+ const bk=T?T.heroes[4]:TEAM[4];G.bench=bk?[makeHero(bk,T?T.lv[4]:0)]:[];
  // reserva que é versão de um titular só entra no lugar dele
  G.bench.forEach(b=>b.linked=G.heroes.some(x=>ident(x.kind)===ident(b.kind)));
  const fl=G.floor,rc=()=>CLASSES[Math.floor(Math.random()*4)];let n;
- if(isBossFloor(fl)){const mn=Math.min(2,Math.floor(fl/5));n=1+mn;const hb=bossHeroAt(fl);G.heroBoss=hb;G.enemies=[hb?makeBossHero(hb,n):makeEnemy(rc(),0,n,{type:'chefao',x:1120}),...Array.from({length:mn},(_,i)=>makeEnemy(rc(),i+1,n,{x:[1330,1470][i]}))]}
+ if(T){const L=T.enemies.filter(e=>e&&e.t);n=L.length;let x=1110;G.enemies=L.map((q,i)=>{const cl=q.c==='rand'?rc():q.c;let e;
+   if(q.t.startsWith('hero:'))e=makeBossHero(q.t.slice(5),n,{i,x:0,floor:fl});else e=makeEnemy(cl,i,n,{type:q.t,x:0,floor:fl});
+   e.x=x+60*((e.big||1)-1);x=e.x+130*(e.big||1)+10*((e.big||1)-1);return e});const span=x-1110,sh=Math.min(0,1560-(1110+span));G.enemies.forEach(e=>e.x+=sh)}
+ else if(isBossFloor(fl)){const mn=Math.min(2,Math.floor(fl/5));n=1+mn;const hb=bossHeroAt(fl);G.heroBoss=hb;G.enemies=[hb?makeBossHero(hb,n):makeEnemy(rc(),0,n,{type:'chefao',x:1120}),...Array.from({length:mn},(_,i)=>makeEnemy(rc(),i+1,n,{x:[1330,1470][i]}))]}
  else{const lo=fl>=6?2:1,hi=fl<3?3:4;n=lo+Math.floor(Math.random()*(hi-lo+1));G.enemies=Array.from({length:n},(_,i)=>makeEnemy(rc(),i,n))}
  fx.length=0;parts.length=0;pops.length=0;props.length=0;Object.assign(cam,{x:BASECAM.x,y:BASECAM.y,z:1,shake:0});focus.alpha=0;focus.ents=[];
  document.getElementById('over').hidden=true;logEl.innerHTML='';buildCards();
- log(`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);
+ log(G.test?`Modo teste (força do andar ${fl}): nada desta luta é salvo.`:`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);
  G.heroes.forEach(h=>{h.alpha=0});G.enemies.forEach(e=>{e.ox=900;e.pose='run'});
  await Promise.all([...G.heroes.map((h,i)=>sleep(i*190).then(()=>entrance(h))),...G.enemies.map((e,i)=>sleep(i*70).then(()=>moveTo(e,e.x,e.y,750)))]);
  if(G!==myG)return;G.heroes.forEach(e=>e.pose='idle');G.enemies.forEach(e=>e.pose='guard');startPlayerTurn();
@@ -2615,6 +2638,10 @@ function awardXP(win){const f=G.floor,base=win?40+12*f:Math.round(12+3*f),inBatt
  for(const k of TEAM.filter(Boolean)){const g=Math.round(base*(inBattle.has(k)?1:.5)),b=lvOf(k);XP[k]=(XP[k]||0)+g;out.push({k,g,b,a:lvOf(k)})}saveXP();return out}
 function endGame(win,quit){if(G.over)return;hideInfo();SND.music(false);setTimeout(()=>win?SND.win():SND.lose(),500);G.over=true;G.phase='over';G.current=null;G.pending=null;if(win)aliveHeroes().forEach(h=>h.pose='raise');
  const t=document.getElementById('overT');t.textContent=win?'VITÓRIA':quit?'DESISTÊNCIA':'DERROTA';t.classList.toggle('lose',!win);
+ if(G.test){document.getElementById('overS').textContent=`MODO TESTE · ${win?'VITÓRIA':'FIM'} NA RODADA ${G.round} · NADA FOI SALVO`;
+  document.getElementById('overXP').innerHTML=[...G.heroes,...G.grave.filter(h=>!G.heroes.includes(h))].map(h=>`<span>${h.name.toUpperCase()} · ${h.dead?'CAIU':Math.ceil(h.hp)+'/'+h.maxHp}</span>`).join('');
+  const ag=document.getElementById('again'),nx=document.getElementById('nextF');nx.hidden=false;nx.firstElementChild.textContent='REPETIR TESTE ▶';ag.classList.remove('main');ag.firstElementChild.textContent='AJUSTAR TESTE';
+  setTimeout(()=>{document.getElementById('over').hidden=false},800);log(win?'Vitória no teste!':'Fim do teste.');updateUI();return}
  const fl=G.floor,xp=awardXP(win);
  if(win){TOWER.best=Math.max(TOWER.best,fl);TOWER.floor=fl+1}else{TOWER.best=Math.max(TOWER.best,fl-1);TOWER.floor=Math.max(1,Math.floor((fl-1)/10)*10+1)}saveTower();
  const coins=win?(isBossFloor(fl)?2:1)*(15+4*fl):4+fl;PROG.coins+=coins;const newU=[];if(win&&G.heroBoss&&unlock(G.heroBoss))newU.push(G.heroBoss);newU.push(...checkEvos());saveProg();
@@ -2651,7 +2678,7 @@ function planText(h){const p=G.plans.get(h.id);if(!p)return null;const n=G.order
  const tg=p.skill.target==='allEnemies'?'todos':p.skill.target==='allAllies'?'time':p.target?p.target.name:'';return `${n}º · ${p.skill.name}${tg?' → '+tg:''}`}
 let lastSig='';
 function updateUI(){if(!G)return;
- document.getElementById('round').textContent=`ANDAR ${G.floor} · RODADA ${G.round}`;{const tn=document.getElementById('turnN');if(tn.textContent!==String(G.round)){tn.textContent=G.round;const tc=tn.parentElement;tc.classList.remove('bump');void tc.offsetWidth;tc.classList.add('bump')}}restartBtn.disabled=G.phase!=='player';if(restartBtn.disabled)resetQuit();
+ document.getElementById('round').textContent=`${G.test?'TESTE':'ANDAR '+G.floor} · RODADA ${G.round}`;{const tn=document.getElementById('turnN');if(tn.textContent!==String(G.round)){tn.textContent=G.round;const tc=tn.parentElement;tc.classList.remove('bump');void tc.offsetWidth;tc.classList.add('bump')}}restartBtn.disabled=G.phase!=='player';if(restartBtn.disabled)resetQuit();
  for(const h of G.heroes){const el=teamEl.querySelector(`[data-id="${h.id}"]`);if(!el)continue;
   setBar(el,'hp',h.hp,h.maxHp);setBar(el,'en',h.energy,1000);setBar(el,'sp',h.special,100);
   el.querySelector('.bar.hp').classList.toggle('low',h.hp<h.maxHp*.3);el.querySelector('.bar.sp').classList.toggle('full',h.special>=100);
@@ -2697,9 +2724,9 @@ let quitArm=0;function resetQuit(){clearTimeout(quitArm);quitArm=0;restartBtn.fi
 restartBtn.addEventListener('click',()=>{if(restartBtn.disabled||!G||G.phase!=='player')return;
  if(!quitArm){SND.cancel();restartBtn.firstElementChild.textContent='TOCAR DE NOVO PARA DESISTIR';restartBtn.classList.add('arm');quitArm=setTimeout(resetQuit,3000);return}
  resetQuit();log('Você desistiu da batalha.');endGame(false,true)});
-document.getElementById('again').addEventListener('click',()=>openFormation());
+document.getElementById('again').addEventListener('click',()=>{if(G&&G.test)openTest();else openFormation()});
 // próximo andar direto, com a mesma equipe
-function nextFloor(){if(!G||!G.over)return;document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle()}
+function nextFloor(){if(!G||!G.over)return;if(G.test){document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle();return}document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle()}
 document.getElementById('nextF').addEventListener('click',nextFloor);
 // barras de volume: o botão ao lado silencia; mexer na barra tira do mudo
 const sndBtn=document.getElementById('snd'),sfxIn=document.getElementById('sfxVol'),sfxOut=document.getElementById('sfxOut');
@@ -2737,7 +2764,7 @@ function nextUnlock(){const k=unlQ.shift();if(!k){unlEl.hidden=true;return}const
 document.getElementById('uOk').addEventListener('click',()=>{SND.click();nextUnlock()});
 function openFormation(){if(G&&G.phase!=='over')return;if(G)SND.pick();SND.music('menu');document.body.classList.add('forming');draft=TEAM.slice();fSel=draft.findIndex(x=>!x);if(fSel<0)fSel=null;
  battleEl.hidden=true;formEl.hidden=false;document.getElementById('over').hidden=true;buildRoster();renderFormation();window.scrollTo({top:0})}
-function closeFormation(){document.body.classList.remove('forming');formEl.hidden=true;battleEl.hidden=false;resize();lastSig='';
+function closeFormation(){TESTCFG=null;document.body.classList.remove('forming');formEl.hidden=true;battleEl.hidden=false;resize();lastSig='';
  TEAM=draft.slice();try{localStorage.setItem('mi-rpg-team',JSON.stringify(TEAM))}catch(e){}SND.confirm();newBattle()}
 // versões do mesmo personagem (Melk e Melk Fase 2): só uma pode ser titular; a outra pode ficar na reserva
 const SAME_AS={destrf:'destr',mrevj:'mrev',melkti:'melkt',destrx:'destr',daweyg:'dawey',melk3:'melk',melk2:'melk',antking:'abacaxi',omegau:'omega'};const ident=k=>SAME_AS[k]||k;
@@ -2868,6 +2895,36 @@ document.getElementById('fSave').addEventListener('click',()=>{if(fullMain())clo
 {const rb=document.getElementById('fResetLv');let arm=0;const reset=()=>{clearTimeout(arm);arm=0;rb.firstElementChild.textContent='REINICIAR PROGRESSO';rb.classList.remove('arm')};
  rb.addEventListener('click',()=>{if(!arm){SND.cancel();rb.firstElementChild.textContent='TOCAR DE NOVO PARA CONFIRMAR';rb.classList.add('arm');arm=setTimeout(reset,3000);return}
   reset();XP={};saveXP();PROG={unl:[],coins:0};saveProg();TOWER={floor:1,best:0};saveTower();TEAM=STARTERS.slice();draft=TEAM.slice();fSel=null;try{localStorage.setItem('mi-rpg-team',JSON.stringify(TEAM))}catch(e){}SND.confirm();buildRoster();renderFormation();fmsg.textContent='Progresso reiniciado: você voltou ao andar 1 só com os 5 personagens iniciais, todos no nível 1 e sem moedas.';fmsg.classList.add('warn')})}
+
+/* =================== MODO TESTE (não salva nada) =================== */
+let TESTCFG=null;const testEl=document.getElementById('testv');
+const TPOS=['POSIÇÃO 1','POSIÇÃO 2','POSIÇÃO 3','POSIÇÃO 4','RESERVA'];
+let TST={heroes:['melk','dawey','gnomo','klem',null],lv:[10,10,10,10,10],enemies:[{t:'brigao',c:'rand'},{t:'atirador',c:'rand'},{t:'',c:'rand'},{t:'',c:'rand'}],floor:10};
+try{const t=JSON.parse(localStorage.getItem('mi-rpg-test')||'null');if(t&&Array.isArray(t.heroes)&&t.heroes.length===5)TST=Object.assign(TST,t);TST.heroes=TST.heroes.map(k=>k&&HEROES[k]?k:null)}catch(e){}
+function heroOpts(sel){const g=['ultimate','super','raro','comum'].map(r=>`<optgroup label="${RARITY[r].n}">${ROSTER.filter(k=>HEROES[k].rarity===r).sort((a,b)=>HEROES[a].name.localeCompare(HEROES[b].name)).map(k=>`<option value="${k}"${k===sel?' selected':''}>${HEROES[k].name}</option>`).join('')}</optgroup>`).join('');return `<option value=""${!sel?' selected':''}>— vazio —</option>${g}`}
+function enemyOpts(sel){const T=Object.entries(ETYPES).map(([k,t])=>`<option value="${k}"${k===sel?' selected':''}>${t.n}</option>`).join('');
+ const H=ROSTER.slice().sort((a,b)=>HEROES[a].name.localeCompare(HEROES[b].name)).map(k=>`<option value="hero:${k}"${'hero:'+k===sel?' selected':''}>Chefão: ${HEROES[k].name}</option>`).join('');
+ return `<option value=""${!sel?' selected':''}>— vazio —</option><optgroup label="CAPANGAS">${T}</optgroup><optgroup label="PERSONAGENS (CHEFÃO)">${H}</optgroup>`}
+const clsOpts=sel=>`<option value="rand"${sel==='rand'?' selected':''}>Classe aleatória</option>`+CLASSES.map(c=>`<option value="${c}"${c===sel?' selected':''}>${CLS[c].n}</option>`).join('');
+function renderTest(){document.getElementById('tHeroes').innerHTML=TST.heroes.map((k,i)=>`<label class="trow"><small>${TPOS[i]}</small><select data-th="${i}" aria-label="${TPOS[i]}">${heroOpts(k)}</select><span>LV</span><input type="number" min="1" max="50" value="${TST.lv[i]}" data-tl="${i}" aria-label="Nível ${TPOS[i]}"></label>`).join('');
+ document.getElementById('tEnemies').innerHTML=TST.enemies.map((q,i)=>`<label class="trow"><small>INIMIGO ${i+1}</small><select data-te="${i}" aria-label="Inimigo ${i+1}">${enemyOpts(q.t)}</select><select data-tc="${i}" aria-label="Classe do inimigo ${i+1}"${!q.t||q.t.startsWith('hero:')?' disabled':''}>${clsOpts(q.c)}</select></label>`).join('');
+ document.getElementById('tFloor').value=TST.floor;saveTest()}
+const saveTest=()=>{try{localStorage.setItem('mi-rpg-test',JSON.stringify(TST))}catch(e){}};
+const clampLv=v=>Math.max(1,Math.min(MAXLV,Math.round(+v)||1));
+testEl.addEventListener('change',ev=>{const t=ev.target,d=t.dataset;
+ if(d.th!=null)TST.heroes[+d.th]=t.value||null;else if(d.tl!=null){TST.lv[+d.tl]=clampLv(t.value);t.value=TST.lv[+d.tl]}
+ else if(d.te!=null){TST.enemies[+d.te].t=t.value;renderTest()}else if(d.tc!=null)TST.enemies[+d.tc].c=t.value;else if(t.id==='tFloor'){TST.floor=Math.max(1,Math.min(99,Math.round(+t.value)||1));t.value=TST.floor}
+ SND.click();saveTest()});
+document.getElementById('tLvAll').addEventListener('click',()=>{const v=clampLv(document.getElementById('tLvAllV').value);TST.lv=TST.lv.map(()=>v);SND.click();renderTest()});
+document.getElementById('tMine').addEventListener('click',()=>{TST.heroes=TEAM.slice();TST.lv=TEAM.map(k=>k?lvOf(k):1);SND.click();renderTest()});
+function openTest(){if(G&&G.phase!=='over'&&!G.over)return;SND.music('menu');document.body.classList.add('forming');battleEl.hidden=true;formEl.hidden=true;testEl.hidden=false;document.getElementById('over').hidden=true;
+ const m=document.getElementById('tMsg');m.classList.remove('warn');m.textContent='Escolha qualquer personagem (mesmo os bloqueados), o nível de cada um e os inimigos. A força dos inimigos segue o andar escolhido.';renderTest();window.scrollTo({top:0})}
+document.getElementById('fTest').addEventListener('click',()=>{SND.pick();openTest()});
+document.getElementById('tExit').addEventListener('click',()=>{testEl.hidden=true;TESTCFG=null;openFormation()});
+document.getElementById('tGo').addEventListener('click',()=>{const m=document.getElementById('tMsg'),hs=TST.heroes.slice(0,4).filter(Boolean),es=TST.enemies.filter(q=>q.t);
+ if(!hs.length||!es.length){m.textContent=!hs.length?'Coloque pelo menos 1 personagem nas posições 1 a 4.':'Escolha pelo menos 1 inimigo.';m.classList.add('warn');SND.cancel();return}
+ TESTCFG={heroes:TST.heroes.slice(),lv:TST.lv.map(clampLv),enemies:TST.enemies.map(q=>({...q})),floor:TST.floor};
+ testEl.hidden=true;document.body.classList.remove('forming');battleEl.hidden=false;resize();lastSig='';SND.confirm();newBattle()});
 
 /* =================== TEMA (só a página em volta; o campo de batalha não muda) =================== */
 const themeBtn=document.getElementById('theme'),rootEl=document.documentElement;
