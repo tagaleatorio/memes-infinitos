@@ -614,7 +614,7 @@ const HEROES={
 
 /* =================== SOM (chiptune gerado na hora, sem arquivos) =================== */
 const SND=(()=>{let ac=null,master=null,noiseBuf=null,muted=false,musicOff=false,wantMusic=null;
- const TR={battle:{url:'rushmi.mp3'},menu:{url:'memesmenu.mp3'}};
+ const TR={battle:{url:'rushmi.mp3'},menu:{url:'memesmenu.mp3'},test:{url:'memestest.mp3'}};
  try{muted=localStorage.getItem('mi-rpg-mute')==='1';musicOff=localStorage.getItem('mi-rpg-music')==='0'}catch(e){}
  let sfxVol=1,musVol=.8;try{const a=parseFloat(localStorage.getItem('mi-rpg-vol-sfx')),b=parseFloat(localStorage.getItem('mi-rpg-vol-mus'));if(a>=0&&a<=1)sfxVol=a;if(b>=0&&b<=1)musVol=b}catch(e){}
  const mv=()=>.5*musVol,sv=()=>.55*sfxVol;
@@ -2427,7 +2427,7 @@ async function xCounter(x,en,dmg){const c=FXC.xis[0];G.actor=x;x.pose='cast';SND
 
 /* =================== TURNOS (planejado: escolhe tudo, depois confirma) =================== */
 async function newBattle(){hideInfo();
- SND.music(true);const myG={round:1,phase:'busy',heroes:[],bench:[],enemies:[],grave:[],current:null,pending:null,over:false,plans:new Map(),order:[],floor:TOWER.floor};G=myG;
+ SND.music(TESTCFG?'test':true);const myG={round:1,phase:'busy',heroes:[],bench:[],enemies:[],grave:[],current:null,pending:null,over:false,plans:new Map(),order:[],floor:TOWER.floor};G=myG;
  const T=TESTCFG;if(T){G.test=true;G.floor=T.floor}
  G.heroes=(T?T.heroes:TEAM).slice(0,4).map((k,i)=>{if(!k)return null;const h=makeHero(k,T?T.lv[i]:0);placeHero(h,i);return h}).filter(Boolean);
  const bk=T?T.heroes[4]:TEAM[4];G.bench=bk?[makeHero(bk,T?T.lv[4]:0)]:[];
