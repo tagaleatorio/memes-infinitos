@@ -377,10 +377,12 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .plist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(max-width:560px){.plist{grid-template-columns:1fr}}
 .pk{border:3px solid #000;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--pkb)}.pk b{font:italic 900 13px var(--mono);letter-spacing:.06em;color:#000}.pk small{font:700 11px/1.4 var(--mono);color:#1b1b1b}.pk .btn{font-size:11px;padding:6px 6px}
 .land .synp .sy,.land .synp>b{font-size:9px;padding:2px 7px}.land .pbox{padding:8px;gap:6px}.land .plist{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ccard .chead .asc{font:900 11px var(--mono);color:#ffd23f;background:#000;padding:1px 6px;transform:skewX(-14deg);letter-spacing:.02em}.land .ccard .chead .asc{font-size:8px}
+.pmsg.pity{color:var(--text);font-style:italic}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
-<div class="cdet" id="packs" hidden role="dialog" aria-label="Loja de pacotes"><div class="pbox"><div class="phead"><b>LOJA DE PACOTES</b><span class="tagb coins"><span id="pCoins"></span></span></div><p class="pmsg" id="pMsg">Cada pacote traz um personagem aleatório da raridade sorteada. Se vier um que você já tem, ele ganha +1 nível.</p><div class="plist" id="pList"></div><div class="ctrl"><button class="btn" id="pClose" type="button"><span>FECHAR</span></button></div></div></div>
+<div class="cdet" id="packs" hidden role="dialog" aria-label="Loja de pacotes"><div class="pbox"><div class="phead"><b>LOJA DE PACOTES</b><span class="tagb coins"><span id="pCoins"></span></span></div><p class="pmsg" id="pMsg">Cada pacote traz um personagem aleatório da raridade sorteada. Alguns personagens só saem em pacotes. Repetidos ganham uma estrela de Ascensão (até ★5, cada uma dá +5% de vida e dano).</p><p class="pmsg pity" id="pPity"></p><div class="plist" id="pList"></div><div class="ctrl"><button class="btn" id="pClose" type="button"><span>FECHAR</span></button></div></div></div>
 <div class="unl" id="unl" hidden role="dialog" aria-label="Novo personagem"><div class="ubox"><small>NOVO PERSONAGEM!</small><div class="ucard"><canvas width="64" height="64"></canvas></div><b id="uName"></b><em id="uHow"></em><button class="btn main" id="uOk" type="button"><span>LEGAL!</span></button></div></div>
 <div class="wrap">
   <header>
@@ -1200,7 +1202,7 @@ const IDLE={
 };
 const idlePose=(k,t,s)=>(IDLE[k]||IDLE.melk)(t,s);
 function base(){return{ox:0,oy:0,pose:'idle',alpha:1,flash:0,shake:0,hurtT:0,rot:0,rc:70,fall:0,flip:1,scale:1,dead:false,t:Math.random()*5,seed:Math.random()*9,cp:null,trail:[],trailOn:false}}
-function makeHero(k,lvT){const d=HEROES[k],lv=lvT||lvOf(k),mh=lvT?Math.round(d.hp*(1+.06*(lv-1))):lvHp(k);return Object.assign(base(),{id:'h'+(UID++),side:'hero',kind:k,name:d.name,cls:d.cls,weak:d.weak,maxHp:mh,hp:mh,energy:250,special:0,level:lv,lvMul:1+.05*(lv-1),skills:d.skills,x:0,y:FLOOR,acted:false,buffs:{atk:0,dawey:null,holo:null}})}
+function makeHero(k,lvT){const d=HEROES[k],lv=lvT||lvOf(k),mh=lvT?Math.round(d.hp*(1+.06*(lv-1))):lvHp(k);return Object.assign(base(),{id:'h'+(UID++),side:'hero',kind:k,name:d.name,cls:d.cls,weak:d.weak,maxHp:mh,hp:mh,energy:250,special:0,level:lv,lvMul:(1+.05*(lv-1))*(lvT?1:ascMul(k)),asc:lvT?0:ascOf(k),skills:d.skills,x:0,y:FLOOR,acted:false,buffs:{atk:0,dawey:null,holo:null}})}
 const ETYPES={
  brigao:{n:'Brigão',w:30,ranged:false,hp:1,atk:1,desc:'Ataca corpo a corpo.'},
  atirador:{n:'Atirador',w:30,ranged:true,hp:.95,atk:1,desc:'Atira de longe. Os tiros podem ser puxados pela esfera do Zero ou devolvidos pelo portal do Void.'},
@@ -1226,7 +1228,9 @@ let XP={};try{if(localStorage.getItem('mi-rpg-xp-ver')!=='3'){localStorage.remov
 const saveXP=()=>{try{localStorage.setItem('mi-rpg-xp',JSON.stringify(XP))}catch(e){}};
 const MAXLV=50,xpNeed=l=>60+l*40;
 function lvInfo(k){let x=XP[k]||0,l=1;while(l<MAXLV&&x>=xpNeed(l)){x-=xpNeed(l);l++}return{l,x,need:xpNeed(l)}}
-const lvOf=k=>lvInfo(k).l,lvHp=k=>Math.round(HEROES[k].hp*(1+.06*(lvOf(k)-1)));
+// ascensão: cada cópia repetida de pacote dá ★ (até 5), +5% de vida e de dano cada
+const ascOf=k=>Math.min(5,(typeof PROG!=='undefined'&&PROG.asc&&PROG.asc[k])||0),ascMul=k=>1+.05*ascOf(k);
+const lvOf=k=>lvInfo(k).l,lvHp=k=>Math.round(HEROES[k].hp*(1+.06*(lvOf(k)-1))*ascMul(k));
 const isBossFloor=f=>f%5===0;
 // fúria da torre: os inimigos ficam mais fortes se a luta demora (andar de chefão demora mais, então começa depois)
 // objetivos bônus de cada andar (opcionais): dão moedas e XP extras; a 1ª vez em cada andar vale o dobro de moedas
@@ -1239,8 +1243,9 @@ const furyStart=()=>G&&isBossFloor(G.floor)?30:20;
 const STARTERS=['melk','dawey','gnomo','klem','abacaxi'];
 const UNLOCK={
  omega:{t:'boss',f:5},xis:{t:'boss',f:10},universal:{t:'boss',f:15},smull:{t:'boss',f:20},chaos:{t:'boss',f:25},destr:{t:'boss',f:30},void:{t:'boss',f:35},zero:{t:'boss',f:40},mvers:{t:'boss',f:45},mrev:{t:'boss',f:50},melkt:{t:'boss',f:55},
- speedy:{t:'shop',p:150},duende:{t:'shop',p:150},weyda:{t:'shop',p:180},copy:{t:'shop',p:220},paral:{t:'shop',p:220},
- mecha:{t:'evo',from:'melk',lv:10},elem:{t:'shop',p:200},tiro:{t:'shop',p:200},glitch:{t:'shop',p:200},ervo:{t:'shop',p:200},melkb:{t:'shop',p:900},xpar:{t:'shop',p:1000},klemu:{t:'evo',from:'klem',lv:15},mversj:{t:'evo',from:'mvers',lv:25},melkf:{t:'evo',from:'melk3',lv:25},
+ // exclusivos de pacote (Comuns, Raros, Super Raro e Ultimates)
+ speedy:{t:'pack'},duende:{t:'pack'},weyda:{t:'pack'},copy:{t:'pack'},paral:{t:'pack'},
+ elem:{t:'pack'},tiro:{t:'pack'},glitch:{t:'pack'},ervo:{t:'pack'},melkb:{t:'pack'},xpar:{t:'pack'},mecha:{t:'pack'},klemu:{t:'pack'},mversj:{t:'pack'},melkf:{t:'pack'},
  melk2:{t:'evo',from:'melk',lv:5},melk3:{t:'evo',from:'melk2',lv:12},daweyg:{t:'evo',from:'dawey',lv:8},antking:{t:'evo',from:'abacaxi',lv:8},omegau:{t:'evo',from:'omega',lv:12},
  destrx:{t:'evo',from:'destr',lv:12},destrf:{t:'evo',from:'destrx',lv:25},melkti:{t:'evo',from:'melkt',lv:25},mrevj:{t:'evo',from:'mrev',lv:25}};
 let PROG={unl:[],coins:0};
@@ -1250,7 +1255,7 @@ const isUnl=k=>!UNLOCK[k]||PROG.unl.includes(k);
 function unlock(k){if(isUnl(k))return false;PROG.unl.push(k);saveProg();return true}
 function checkEvos(){const out=[];let ch=true;while(ch){ch=false;for(const[k,u]of Object.entries(UNLOCK))if(u.t==='evo'&&!isUnl(k)&&isUnl(u.from)&&lvOf(u.from)>=u.lv){unlock(k);out.push(k);ch=true}}return out}
 const bossHeroAt=f=>Object.keys(UNLOCK).find(k=>UNLOCK[k].t==='boss'&&UNLOCK[k].f===f&&!isUnl(k))||null;
-function unlockTxt(k){const u=UNLOCK[k];return u.t==='boss'?`Vença no andar ${u.f}`:u.t==='shop'?`Loja · ${u.p} moedas`:`${HEROES[u.from].name} no LV ${u.lv}`}
+function unlockTxt(k){const u=UNLOCK[k];return u.t==='boss'?`Vença no andar ${u.f}`:u.t==='shop'?`Loja · ${u.p} moedas`:u.t==='pack'?'Só em pacotes':`${HEROES[u.from].name} no LV ${u.lv}`}
 // andares com regra (3, 8, 13, 18...): a equipe precisa seguir a regra; vale +50% de moedas e +30% de XP
 const RULES=[
  {id:'comum',n:'SÓ COMUNS',d:'todos da equipe (titulares e reserva) precisam ser Comuns',ok:ks=>ks.every(k=>HEROES[k].rarity==='comum')},
@@ -1279,9 +1284,16 @@ const SYN=[
 const synOf=ks=>SYN.filter(s=>s.test(ks));
 // pacotes: personagem aleatório; repetido vira +1 nível para ele
 const PACKS=[{id:'b',n:'PACOTE BÁSICO',p:300,ch:{comum:.7,raro:.25,super:.05}},{id:'r',n:'PACOTE RARO',p:900,ch:{raro:.7,super:.25,ultimate:.05}},{id:'l',n:'PACOTE LENDÁRIO',p:2500,ch:{super:.7,ultimate:.3}}];
+const PITY=10;
 function rollPack(P){let r=Math.random(),rar='comum';for(const[k,v]of Object.entries(P.ch)){rar=k;if((r-=v)<0)break}
- const pool=ROSTER.filter(k=>HEROES[k].rarity===rar),k=pool[Math.floor(Math.random()*pool.length)];
- if(!isUnl(k)){unlock(k);return{k,dup:false}}const L=lvInfo(k);if(L.l<MAXLV){XP[k]=(XP[k]||0)+(L.need-L.x);saveXP()}else PROG.coins+=Math.round(P.p*.3);return{k,dup:true,max:L.l>=MAXLV}}
+ let pool=ROSTER.filter(k=>HEROES[k].rarity===rar),pity=false;
+ // garantia: depois de 10 pacotes sem personagem novo, o próximo traz um que você ainda não tem
+ if((PROG.miss||0)>=PITY-1){const lk=pool.filter(k=>!isUnl(k));const any=ROSTER.filter(k=>!isUnl(k)&&P.ch[HEROES[k].rarity]);if(lk.length){pool=lk;pity=true}else if(any.length){pool=any;pity=true}}
+ const k=pool[Math.floor(Math.random()*pool.length)];
+ if(!isUnl(k)){unlock(k);PROG.miss=0;return{k,dup:false,pity}}
+ PROG.miss=(PROG.miss||0)+1;PROG.asc=PROG.asc||{};
+ if(ascOf(k)<5){PROG.asc[k]=ascOf(k)+1;return{k,dup:true,asc:PROG.asc[k]}}
+ const L=lvInfo(k);if(L.l<MAXLV){XP[k]=(XP[k]||0)+(L.need-L.x);saveXP();return{k,dup:true,lv:true}}PROG.coins+=Math.round(P.p*.3);return{k,dup:true,max:true}}
 checkEvos();
 const HX=e=>e.x+e.ox,HY=e=>e.y+e.oy;
 const faceOf=e=>(e.side==='hero'?1:-1)*e.flip;
@@ -3125,7 +3137,7 @@ function placeIn(k){
  if(!isUnl(k)){const u=UNLOCK[k],nm=HEROES[k].name;fmsg.classList.add('warn');
   if(u.t==='shop'&&PROG.coins>=u.p){if(buyArm!==k){buyArm=k;clearTimeout(buyT);buyT=setTimeout(()=>{buyArm=null;renderFormation()},3000);SND.pick();renderFormation();fmsg.textContent=`Toque de novo em ${nm} para comprar por ${u.p} moedas.`;fmsg.classList.add('warn');return}
    buyArm=null;clearTimeout(buyT);PROG.coins-=u.p;unlock(k);saveProg();SND.confirm();buildRoster();renderFormation();showUnlock([k]);fmsg.textContent=`${nm} comprado! Agora ele pode entrar na equipe.`;fmsg.classList.add('warn');return}
-  SND.cancel();fmsg.textContent=u.t==='shop'?`${nm} custa ${u.p} moedas na loja (você tem ${PROG.coins}). Ganhe moedas vencendo andares.`:u.t==='boss'?`${nm} está bloqueado: ele é o chefão do andar ${u.f}. Vença essa luta para liberar.`:`${nm} está bloqueado: chegue com ${HEROES[u.from].name} ao nível ${u.lv} para liberar.`;return}
+  SND.cancel();fmsg.textContent=u.t==='pack'?`${nm} é exclusivo dos pacotes: abra pacotes em PACOTES para tentar conseguir.`:u.t==='shop'?`${nm} custa ${u.p} moedas na loja (você tem ${PROG.coins}). Ganhe moedas vencendo andares.`:u.t==='boss'?`${nm} está bloqueado: ele é o chefão do andar ${u.f}. Vença essa luta para liberar.`:`${nm} está bloqueado: chegue com ${HEROES[u.from].name} ao nível ${u.lv} para liberar.`;return}
  const cur=draft.indexOf(k);
  if(fSel==null){
   if(cur>=0){draft[cur]=null;fSel=cur;SND.cancel()}
@@ -3146,7 +3158,7 @@ function slotHTML(i){const k=draft[i],h=k&&HEROES[k];
 // poder: força do personagem (vida, ataques, utilidade, raridade) multiplicada pelo nível
 const RRAW={comum:0,raro:15,super:35,ultimate:70};
 function heroRaw(k){const h=HEROES[k];let off=0,util=0;for(const s of h.skills){if(s.power)off+=s.power*(s.target==='allEnemies'?2.2:1)*(s.special?.35:s.cost?.45:1);else util+=s.special?45:25;if(s.heal)util+=s.heal*(s.target==='allAllies'?.08:.03);if(s.shield)util+=s.shield*.03}return h.hp*.03+off*.12+util+(RRAW[h.rarity]||0)}
-const heroPower=k=>Math.round(Math.max(10,heroRaw(k)-110)*1.38*(1+.06*(lvOf(k)-1)));
+const heroPower=k=>Math.round(Math.max(10,heroRaw(k)-110)*1.38*(1+.06*(lvOf(k)-1))*(1+.08*ascOf(k)));
 const teamPower=d=>Math.round(d.slice(0,4).filter(Boolean).reduce((a,k)=>a+heroPower(k),0)+(d[4]?heroPower(d[4])*.5:0));
 const recPower=f=>Math.round((300+60*(f-1))*(isBossFloor(f)?1.15:1));
 function renderTeamMeter(){const ks=draft.filter(Boolean),avg=teamPower(draft),f=TOWER.floor,rec=recPower(f),top=Math.max(rec*1.4,avg,100),lv=ks.length?ks.reduce((a,k)=>a+lvOf(k),0)/ks.length:0;
@@ -3190,7 +3202,7 @@ function applyRosterView(){const ord={best:(a,b)=>heroScore(b)-heroScore(a),wors
 document.querySelectorAll('.rtools .fb').forEach(b=>b.addEventListener('click',()=>{FILT[b.dataset.f]=b.dataset.v;SND.click();applyRosterView()}));
 document.getElementById('fOrd').addEventListener('change',e=>{FILT.o=e.target.value;SND.click();applyRosterView()});
 const rarOf=k=>RARITY[HEROES[k].rarity]?HEROES[k].rarity:'comum';
-const cardHead=k=>{const h=HEROES[k];return `<div class="chead"><span class="nm"><span>${h.name.toUpperCase()}</span></span><span class="lv">LV<b>${lvOf(k)}</b></span>${chip(h.cls)}</div>`};
+const cardHead=k=>{const h=HEROES[k];return `<div class="chead"><span class="nm"><span>${h.name.toUpperCase()}</span></span><span class="lv">LV<b>${lvOf(k)}</b></span>${ascOf(k)?`<span class="asc">${'★'.repeat(ascOf(k))}</span>`:''}${chip(h.cls)}</div>`};
 function cardBody(k,maxHp){const h=HEROES[k];return `<div class="cbody">
    <div class="sub" style="--cc:${CLS[h.weak].c}">Classe <b style="color:${CLS[h.cls].c}">${CLS[h.cls].n}</b> · fraco contra <b>${CLS[h.weak].n}</b></div>
    ${!isUnl(k)?`<div class="bond">🔒 Bloqueado · ${unlockTxt(k)}</div>`:''}${h.bond?`<div class="bond">${h.bond}</div>`:''}<div class="stat"><b>PODER</b><span>${heroPower(k)}</span></div><div class="stat"><b>VIDA</b><span>${lvHp(k)}</span></div><div class="bar hp"><i style="width:${lvHp(k)/maxHp*100}%"></i></div>${(()=>{const L=lvInfo(k);return L.l>=MAXLV?'<div class="stat xp"><b>XP</b><span>NÍVEL MÁXIMO</span></div>':`<div class="stat xp"><b>XP</b><span>${L.x}/${L.need}</span></div><div class="bar xpb"><i style="width:${L.x/L.need*100}%"></i></div>`})()}
@@ -3211,7 +3223,7 @@ function openDet(k){detK=k;const h=HEROES[k],r=rarOf(k),maxHp=Math.max(...ROSTER
  cdMsg.hidden=true;syncDet();cdetEl.hidden=false;SND.pick();document.getElementById('cdClose').focus()}
 const trainCost=k=>40*lvOf(k);
 function syncDet(){if(detK==null)return;{const t=document.getElementById('cdTrain'),k=detK,c=trainCost(k),mx=lvOf(k)>=MAXLV;t.hidden=!isUnl(k);t.disabled=mx||PROG.coins<c;t.firstElementChild.textContent=mx?'NÍVEL MÁXIMO':`TREINAR +1 LV · ${c} MOEDAS`}const k=detK,b=document.getElementById('cdPick'),u=UNLOCK[k],i=draft?draft.indexOf(k):-1;
- b.hidden=false;b.firstElementChild.textContent=!isUnl(k)?(u.t==='shop'?(PROG.coins>=u.p?(buyArm===k?'TOCAR DE NOVO PARA COMPRAR':`COMPRAR · ${u.p} MOEDAS`):`FALTAM ${u.p-PROG.coins} MOEDAS`):'BLOQUEADO'):i>=0?'TIRAR DA EQUIPE':'COLOCAR NA EQUIPE';
+ b.hidden=false;b.firstElementChild.textContent=!isUnl(k)?(u.t==='shop'?(PROG.coins>=u.p?(buyArm===k?'TOCAR DE NOVO PARA COMPRAR':`COMPRAR · ${u.p} MOEDAS`):`FALTAM ${u.p-PROG.coins} MOEDAS`):u.t==='pack'?'SÓ EM PACOTES':'BLOQUEADO'):i>=0?'TIRAR DA EQUIPE':'COLOCAR NA EQUIPE';
  b.disabled=!isUnl(k)&&!(u.t==='shop'&&PROG.coins>=u.p)}
 function closeDet(){cdetEl.hidden=true;const k=detK;detK=null;const c=k&&rosterEl.querySelector(`[data-k="${k}"] .more`);if(c)c.focus()}
 document.getElementById('cdTrain').addEventListener('click',()=>{const k=detK;if(!k||!isUnl(k))return;const c=trainCost(k),L=lvInfo(k);if(L.l>=MAXLV||PROG.coins<c){SND.cancel();return}
@@ -3252,7 +3264,8 @@ function renderSyn(){const el=document.getElementById('synp'),ks=draft.slice(0,4
  const dt=el.querySelector('details');if(renderSyn.open)dt.open=true;dt.addEventListener('toggle',()=>renderSyn.open=dt.open)}
 // ---------- loja de pacotes ----------
 const packsEl=document.getElementById('packs');const PKB={b:'linear-gradient(135deg,#d8dbe0,#ffffff)',r:'linear-gradient(135deg,#c8961e,#fff1b0)',l:'linear-gradient(135deg,#a855ff,#f0d9ff)'};let packArm=null,packT=0;
-function renderPacks(){document.getElementById('pCoins').textContent=`MOEDAS ${PROG.coins}`;
+function renderPity(){const e=document.getElementById('pPity');if(e)e.textContent=`GARANTIA DE NOVO: ${Math.min(PITY,(PROG.miss||0))}/${PITY}`}
+function renderPacks(){document.getElementById('pCoins').textContent=`MOEDAS ${PROG.coins}`;renderPity();
  document.getElementById('pList').innerHTML=PACKS.map(P=>`<div class="pk" style="--pkb:${PKB[P.id]}"><b>${P.n}</b><small>${Object.entries(P.ch).map(([r,v])=>`${RARITY[r].n}: ${Math.round(v*100)}%`).join('<br>')}</small><button class="btn main" type="button" data-pk="${P.id}"${PROG.coins<P.p?' disabled':''}><span>${packArm===P.id?'TOCAR DE NOVO':`ABRIR · ${P.p} MOEDAS`}</span></button></div>`).join('')}
 function openPacks(){packArm=null;renderPacks();document.getElementById('pMsg').classList.remove('warn');packsEl.hidden=false;SND.pick()}
 document.getElementById('fPacks').addEventListener('click',openPacks);
@@ -3260,8 +3273,9 @@ document.getElementById('pClose').addEventListener('click',()=>{packsEl.hidden=t
 packsEl.addEventListener('click',ev=>{if(ev.target===packsEl){packsEl.hidden=true;return}const b=ev.target.closest('[data-pk]');if(!b||b.disabled)return;const P=PACKS.find(x=>x.id===b.dataset.pk);
  if(packArm!==P.id){packArm=P.id;clearTimeout(packT);packT=setTimeout(()=>{packArm=null;renderPacks()},3000);SND.pick();renderPacks();return}
  packArm=null;if(PROG.coins<P.p)return;PROG.coins-=P.p;const res=rollPack(P);const ev2=checkEvos();saveProg();SND.confirm();buildRoster();renderFormation();renderPacks();
- const h=HEROES[res.k];document.getElementById('pMsg').textContent=res.dup?`Veio ${h.name} de novo: ${res.max?'ele já está no nível máximo, então você recebeu parte das moedas de volta':'ele subiu para o nível '+lvOf(res.k)}.`:`Você conseguiu ${h.name}!`;
- showUnlock([{k:res.k,title:res.dup?'REPETIDO!':'NOVO PERSONAGEM!',how:res.dup?(res.max?'Já estava no nível máximo: parte das moedas voltou':`Virou treino: subiu para o LV ${lvOf(res.k)}`):undefined},...ev2])});
+ const h=HEROES[res.k],how=res.asc?`ASCENSÃO ${'★'.repeat(res.asc)} · +${res.asc*5}% de vida e dano`:res.lv?`Já tinha ★★★★★: subiu para o LV ${lvOf(res.k)}`:res.max?'Já estava no máximo: parte das moedas voltou':undefined;
+ document.getElementById('pMsg').textContent=res.dup?`Veio ${h.name} de novo: ${how}.`:`Você conseguiu ${h.name}!${res.pity?' (garantia de 10 pacotes)':''}`;renderPity();
+ showUnlock([{k:res.k,title:res.dup?'REPETIDO!':res.pity?'GARANTIA: NOVO PERSONAGEM!':'NOVO PERSONAGEM!',how},...ev2])});
 /* =================== MODO TESTE (não salva nada) =================== */
 let TESTCFG=null;const testEl=document.getElementById('testv');
 const TPOS=['POSIÇÃO 1','POSIÇÃO 2','POSIÇÃO 3','POSIÇÃO 4','RESERVA'];
