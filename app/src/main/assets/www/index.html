@@ -369,9 +369,18 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .land .objs{top:34px;right:4px;gap:2px}.land .objs b{font-size:7px}.land .objs span{font-size:8px;padding:0 6px}
 @media(max-width:640px){.objs{top:40px;right:6px}.objs span{font-size:8px}}
 .over .xpl span.star{color:#000;background:#ffd23f;border-color:#000}.over .xpl span.nostar{color:#8a8a8a;background:#1b1b1b;border-color:#555;text-decoration:line-through}
+.synp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.synp>b{font:italic 900 11px var(--mono);letter-spacing:.16em;background:#ffd23f;color:#000;padding:3px 10px;transform:skewX(-14deg)}
+.synp .sy{font:italic 700 11px var(--mono);background:#000;color:#ffd23f;padding:3px 10px;transform:skewX(-14deg)}.synp .sy span,.synp>b span{display:inline-block;transform:skewX(14deg)}.synp .none{font:700 12px var(--mono);color:var(--muted)}
+.synp details{flex-basis:100%;font:12px/1.4 var(--mono);color:var(--muted)}.synp summary{cursor:pointer;font:italic 700 11px var(--mono);letter-spacing:.08em;color:var(--text)}.synp details ul{margin:6px 0 0;padding-left:18px}.synp details li.on{color:var(--text);font-weight:700}
+.pbox{display:flex;flex-direction:column;gap:10px;width:min(560px,100%);max-height:100%;overflow:auto;background:var(--panel);border:4px solid #000;box-shadow:8px 8px 0 #ffd23f;padding:14px;box-sizing:border-box}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:8px}.phead b{font:italic 900 16px var(--mono);letter-spacing:.14em}.pmsg{margin:0;font:700 12px var(--mono);color:var(--muted)}.pmsg.warn{color:#e0686a}
+.plist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(max-width:560px){.plist{grid-template-columns:1fr}}
+.pk{border:3px solid #000;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--pkb)}.pk b{font:italic 900 13px var(--mono);letter-spacing:.06em;color:#000}.pk small{font:700 11px/1.4 var(--mono);color:#1b1b1b}.pk .btn{font-size:11px;padding:6px 6px}
+.land .synp .sy,.land .synp>b{font-size:9px;padding:2px 7px}.land .pbox{padding:8px;gap:6px}.land .plist{grid-template-columns:repeat(3,minmax(0,1fr))}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
+<div class="cdet" id="packs" hidden role="dialog" aria-label="Loja de pacotes"><div class="pbox"><div class="phead"><b>LOJA DE PACOTES</b><span class="tagb coins"><span id="pCoins"></span></span></div><p class="pmsg" id="pMsg">Cada pacote traz um personagem aleatório da raridade sorteada. Se vier um que você já tem, ele ganha +1 nível.</p><div class="plist" id="pList"></div><div class="ctrl"><button class="btn" id="pClose" type="button"><span>FECHAR</span></button></div></div></div>
 <div class="unl" id="unl" hidden role="dialog" aria-label="Novo personagem"><div class="ubox"><small>NOVO PERSONAGEM!</small><div class="ucard"><canvas width="64" height="64"></canvas></div><b id="uName"></b><em id="uHow"></em><button class="btn main" id="uOk" type="button"><span>LEGAL!</span></button></div></div>
 <div class="wrap">
   <header>
@@ -390,7 +399,8 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
   </section>
   <section class="formation view" id="formation" hidden aria-label="Formação de equipe">
     <div class="fhead"><span class="tagb"><span>FORMAÇÃO DE EQUIPE</span></span><span class="tagb tower"><span id="fFloor"></span></span><span class="tagb coins"><span id="fCoins"></span></span><span class="flsel" role="group" aria-label="Escolher andar"><button type="button" class="fb" id="flPrev" aria-label="Andar anterior">◀</button><select id="fFl" aria-label="Andar da próxima batalha"></select><button type="button" class="fb" id="flNext" aria-label="Próximo andar">▶</button></span><span id="fmsg"></span>
-      <div class="ctrl"><button class="btn" id="fTest" type="button"><span>MODO TESTE</span></button><button class="btn" id="fResetLv" type="button"><span>REINICIAR PROGRESSO</span></button><button class="btn main" id="fSave" type="button"><span>COMEÇAR BATALHA ▶</span></button></div></div>
+      <div class="ctrl"><button class="btn" id="fPacks" type="button"><span>PACOTES</span></button><button class="btn" id="fTest" type="button"><span>MODO TESTE</span></button><button class="btn" id="fResetLv" type="button"><span>REINICIAR PROGRESSO</span></button><button class="btn main" id="fSave" type="button"><span>COMEÇAR BATALHA ▶</span></button></div></div>
+    <div class="synp" id="synp"></div>
     <div class="tmeter" id="tmeter"><b>PODER DO TIME</b><span class="tv" id="tmV">0</span><div class="tbar"><i id="tmBar"></i><em id="tmRec"></em></div><span class="tr" id="tmTxt"></span></div>
     <div class="slots" id="slots"></div>
     <div class="rtools">
@@ -1241,7 +1251,37 @@ function unlock(k){if(isUnl(k))return false;PROG.unl.push(k);saveProg();return t
 function checkEvos(){const out=[];let ch=true;while(ch){ch=false;for(const[k,u]of Object.entries(UNLOCK))if(u.t==='evo'&&!isUnl(k)&&isUnl(u.from)&&lvOf(u.from)>=u.lv){unlock(k);out.push(k);ch=true}}return out}
 const bossHeroAt=f=>Object.keys(UNLOCK).find(k=>UNLOCK[k].t==='boss'&&UNLOCK[k].f===f&&!isUnl(k))||null;
 function unlockTxt(k){const u=UNLOCK[k];return u.t==='boss'?`Vença no andar ${u.f}`:u.t==='shop'?`Loja · ${u.p} moedas`:`${HEROES[u.from].name} no LV ${u.lv}`}
-const floorTag=f=>{const hb=isBossFloor(f)&&bossHeroAt(f);return hb?` · CHEFÃO: ${HEROES[hb].name.toUpperCase()}`:isBossFloor(f)?' · CHEFÃO':''};
+// andares com regra (3, 8, 13, 18...): a equipe precisa seguir a regra; vale +50% de moedas e +30% de XP
+const RULES=[
+ {id:'comum',n:'SÓ COMUNS',d:'todos da equipe (titulares e reserva) precisam ser Comuns',ok:ks=>ks.every(k=>HEROES[k].rarity==='comum')},
+ {id:'semtop',n:'SEM SUPER RAROS NEM ULTIMATES',d:'só Comuns e Raros podem entrar na equipe',ok:ks=>ks.every(k=>RRANK[HEROES[k].rarity]<=2)},
+ {id:'cores',n:'CLASSES DIFERENTES',d:'os titulares precisam ser todos de classes diferentes',ok:(ks,t)=>new Set(t.map(k=>HEROES[k].cls)).size===t.length},
+ {id:'trio',n:'TRIO',d:'no máximo 3 titulares (uma posição fica vazia)',ok:(ks,t)=>t.length<=3},
+ {id:'cls',cls:true}];
+const isRuleFloor=f=>f%5===3;
+function ruleOf(f){if(!isRuleFloor(f))return null;const i=Math.floor(f/5)%5;const r=RULES[i];if(!r.cls)return r;
+ const c=CLASSES[Math.floor(f/25)%4],own=ROSTER.filter(k=>isUnl(k)&&HEROES[k].cls===c).length;if(f<23||own<2)return RULES[(i+1)%4];
+ return{id:'cls',n:`TIME ${CLS[c].n.toUpperCase()}`,d:`pelo menos 2 titulares da classe ${CLS[c].n}`,ok:(ks,t)=>t.filter(k=>HEROES[k].cls===c).length>=2}}
+const ruleOk=(d,f)=>{const r=ruleOf(f);return!r||r.ok(d.filter(Boolean),d.slice(0,4).filter(Boolean))};
+const floorTag=f=>{const hb=isBossFloor(f)&&bossHeroAt(f),r=ruleOf(f);return hb?` · CHEFÃO: ${HEROES[hb].name.toUpperCase()}`:isBossFloor(f)?' · CHEFÃO':r?` · REGRA: ${r.n}`:''};
+// sinergias: combinações de personagens dão bônus na batalha
+const SYN=[
+ {id:'rivDG',n:'RIVAIS: DUENDE × GNOMO',d:'Duende e Gnomo juntos: os dois causam +15% de dano.',test:ks=>ks.includes('duende')&&ks.includes('gnomo'),who:['duende','gnomo'],atk:.15},
+ {id:'rivWD',n:'RIVAIS: WEYDA × DAWEY',d:'Weyda e Dawey (ou Dawey Fantasma) juntos: os dois causam +15% de dano.',test:ks=>ks.includes('weyda')&&ks.some(k=>ident(k)==='dawey'),who:['weyda','dawey','daweyg'],atk:.15},
+ {id:'orig',n:'ORIGINAL E CÓPIA',d:'Um Melk (qualquer fase) e o Mecha Melk juntos: o time todo causa +10% de dano.',test:ks=>ks.includes('mecha')&&ks.some(k=>ident(k)==='melk'),atk:.10},
+ {id:'par',n:'UNIVERSOS PARALELOS',d:'X e Ex juntos: o time todo causa +10% de dano.',test:ks=>ks.includes('xis')&&ks.includes('xpar'),atk:.10},
+ {id:'multi',n:'LADOS DO MULTIVERSO',d:'Um Multiversal e um Multiversal Reverso (qualquer versão) juntos: o time todo recebe 10% menos dano.',test:ks=>ks.some(k=>ident(k)==='mvers')&&ks.some(k=>ident(k)==='mrev'),def:.10},
+ {id:'nat',n:'FORÇAS DA NATUREZA',d:'Elemento e Ervo juntos: o time todo recebe 8% menos dano.',test:ks=>ks.includes('elem')&&ks.includes('ervo'),def:.08},
+ {id:'fam',n:'FAMÍLIA MELK',d:'3 ou mais Melks diferentes (Melk, Melk T, Melk B, Mecha Melk...): o time todo ganha +12% de vida.',test:ks=>ks.filter(k=>/melk/i.test(HEROES[k].name)).length>=3,hp:.12},
+ {id:'comum',n:'QUARTETO COMUM',d:'4 titulares Comuns: o time todo causa +12% de dano e ganha +20% de XP.',test:ks=>ks.length>=4&&ks.every(k=>HEROES[k].rarity==='comum'),atk:.12,xp:.2},
+ {id:'cls',n:'CLASSE UNIDA',d:'3 ou mais titulares da mesma classe: o time todo causa +12% de dano.',test:ks=>CLASSES.some(c=>ks.filter(k=>HEROES[k].cls===c).length>=3),atk:.12},
+ {id:'rainbow',n:'ARCO-ÍRIS',d:'4 titulares de 4 classes diferentes: todos começam a luta com +200 de energia.',test:ks=>ks.length>=4&&new Set(ks.map(k=>HEROES[k].cls)).size===4,en:200}];
+const synOf=ks=>SYN.filter(s=>s.test(ks));
+// pacotes: personagem aleatório; repetido vira +1 nível para ele
+const PACKS=[{id:'b',n:'PACOTE BÁSICO',p:300,ch:{comum:.7,raro:.25,super:.05}},{id:'r',n:'PACOTE RARO',p:900,ch:{raro:.7,super:.25,ultimate:.05}},{id:'l',n:'PACOTE LENDÁRIO',p:2500,ch:{super:.7,ultimate:.3}}];
+function rollPack(P){let r=Math.random(),rar='comum';for(const[k,v]of Object.entries(P.ch)){rar=k;if((r-=v)<0)break}
+ const pool=ROSTER.filter(k=>HEROES[k].rarity===rar),k=pool[Math.floor(Math.random()*pool.length)];
+ if(!isUnl(k)){unlock(k);return{k,dup:false}}const L=lvInfo(k);if(L.l<MAXLV){XP[k]=(XP[k]||0)+(L.need-L.x);saveXP()}else PROG.coins+=Math.round(P.p*.3);return{k,dup:true,max:L.l>=MAXLV}}
 checkEvos();
 const HX=e=>e.x+e.ox,HY=e=>e.y+e.oy;
 const faceOf=e=>(e.side==='hero'?1:-1)*e.flip;
@@ -1523,7 +1563,7 @@ function dealDamage(src,tgt,basePow,o={}){
  if(tgt.side==='hero'&&tgt.buffs.ghost>0){const[x0,y0]=chest(tgt);pop(x0,y0-60,'INTANGÍVEL','#e6e8f0',9);SND.whoosh();for(let i=0;i<8;i++)parts.push({x:x0+rand(-40,40),y:y0+rand(-60,60),vx:rand(-60,60),vy:-rand(20,80),l:.5,m:0,col:'#e6e8f0',sz:PX,g:0});return 0}
  if(tgt.side==='hero'&&tgt.buffs.invul>0){const[x0,y0]=chest(tgt);pop(x0,y0-60,'INVENCÍVEL','#ffe27a',9);SND.block();tgt.flash=.06;ring(x0,y0,'#ffe27a',30,110,260);return 0}
  const m=o.raw?1:mult(src,tgt);let d=basePow*m;
- if(!o.raw){if(src.side==='hero'&&src.buffs.atk>0)d*=1.4;if(src.side==='hero'&&src.buffs.armor>0)d*=1.5;if(src.side==='hero')d*=sibMult(src)*(src.lvMul||1)*(src.buffs.focus>0&&!src.curSp?2:1);if(tgt.side==='hero'&&tgt.buffs.armor>0)d*=.5;
+ if(!o.raw){if(src.side==='hero'&&src.buffs.atk>0)d*=1.4;if(src.side==='hero'&&src.buffs.armor>0)d*=1.5;if(src.side==='hero'&&src.synAtk)d*=1+src.synAtk;if(tgt.side==='hero'&&tgt.synDef)d*=1-tgt.synDef;if(src.side==='hero')d*=sibMult(src)*(src.lvMul||1)*(src.buffs.focus>0&&!src.curSp?2:1);if(tgt.side==='hero'&&tgt.buffs.armor>0)d*=.5;
  if(src.side==='enemy'&&src.atkDown>0)d*=.7;if(tgt.side==='hero'&&G&&G.timeShield&&src.side==='enemy'){d*=.3;G.timeShield.hit=gnow();if(!o.small)pop(chest(tgt)[0]+30,chest(tgt)[1]-90,'BARREIRA -70%','#ffd23f',7)}
  if(src.side==='enemy'&&G&&G.round>=furyStart())d*=1+.1*(G.round-furyStart()+1);if(tgt.side==='hero'&&tgt.buffs.guard>0)d*=.5;if(tgt.kind==='destrf')d*=.8;if(tgt.kind==='mecha')d*=.85;
  if(src.powerOn)d*=2;if(src.side==='enemy'&&src.rage>0)d*=1.5;
@@ -2720,6 +2760,10 @@ async function newBattle(){hideInfo();
  const T=TESTCFG;if(T){G.test=true;G.floor=T.floor}
  G.heroes=(T?T.heroes:TEAM).slice(0,4).map((k,i)=>{if(!k)return null;const h=makeHero(k,T?T.lv[i]:0);placeHero(h,i);return h}).filter(Boolean);
  const bk=T?T.heroes[4]:TEAM[4];G.bench=bk?[makeHero(bk,T?T.lv[4]:0)]:[];
+ {const ks=G.heroes.map(h=>h.kind);G.syn=synOf(ks);G.synXp=G.syn.reduce((a,s)=>a+(s.xp||0),0);
+  for(const h of[...G.heroes,...G.bench]){let atk=0,def=0,hp=0,en=0;for(const s of G.syn){if(s.who&&!s.who.includes(h.kind))continue;atk+=s.atk||0;def+=s.def||0;hp+=s.hp||0;en+=s.en||0}
+   h.synAtk=atk;h.synDef=def;if(hp){h.maxHp=h.hp=Math.round(h.maxHp*(1+hp))}h.energy=Math.min(1000,h.energy+en)}
+  G.rule=T?null:ruleOf(G.floor)}
  // reserva que é versão de um titular só entra no lugar dele
  G.bench.forEach(b=>b.linked=G.heroes.some(x=>ident(x.kind)===ident(b.kind)));
  const fl=G.floor,rc=()=>CLASSES[Math.floor(Math.random()*4)];let n;
@@ -2730,7 +2774,7 @@ async function newBattle(){hideInfo();
  else{const lo=fl>=6?2:1,hi=fl<3?3:4;n=lo+Math.floor(Math.random()*(hi-lo+1));G.enemies=Array.from({length:n},(_,i)=>makeEnemy(rc(),i,n))}
  fx.length=0;parts.length=0;pops.length=0;props.length=0;Object.assign(cam,{x:BASECAM.x,y:BASECAM.y,z:1,shake:0});focus.alpha=0;focus.ents=[];
  document.getElementById('over').hidden=true;logEl.innerHTML='';buildCards();
- log(G.test?`Modo teste (força do andar ${fl}): nada desta luta é salvo.`:`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);if(!G.test)log('Bônus: vença sem baixas, em até 15 turnos e em até 8 turnos para ganhar moedas e XP extras.');
+ log(G.test?`Modo teste (força do andar ${fl}): nada desta luta é salvo.`:`Andar ${fl}${isBossFloor(fl)?' · CHEFÃO':''}: ${n} ${n>1?'inimigos apareceram':'inimigo apareceu'}.`);if(G.heroBoss)log(`${HEROES[G.heroBoss].name} desafia a sua equipe! Vença para liberar.`);if(G.syn&&G.syn.length)log(`Sinergias: ${G.syn.map(s=>s.n.toLowerCase()).join(', ')}.`);if(G.rule)log(`Andar com regra (${G.rule.n.toLowerCase()}): +50% de moedas e +30% de XP.`);if(!G.test)log('Bônus: vença sem baixas, em até 15 turnos e em até 8 turnos para ganhar moedas e XP extras.');
  G.heroes.forEach(h=>{h.alpha=0});G.enemies.forEach(e=>{e.ox=900;e.pose='run'});
  await Promise.all([...G.heroes.map((h,i)=>sleep(i*190).then(()=>entrance(h))),...G.enemies.map((e,i)=>sleep(i*70).then(()=>moveTo(e,e.x,e.y,750)))]);
  if(G!==myG)return;G.heroes.forEach(e=>e.pose='idle');G.enemies.forEach(e=>e.pose='guard');startPlayerTurn();
@@ -2913,6 +2957,7 @@ function effectsOf(e){const L=[],add=(c,n,d,col)=>{if(c)L.push({n,d,col})},b=e.b
   add(e.kind==='melkt','ESQUIVA TOTAL','Nenhum ataque acerta o Melk T: ele desvia de tudo.','#3ff5d8');
   add(e.kind==='melkt',`TÉDIO · ${e.bored||0}/12`,'Depois de 12 turnos em campo ele fica entediado e vai embora (conta como derrota dele).','#c48bff');
   add(specialLocked(e)&&!(b.invul>0),'ESPECIAL EM USO','O efeito do especial ainda está ativo: a barra de especial só volta a encher quando ele terminar.','#a05cff');
+  for(const sy of(G&&G.syn||[]))if(!sy.who||sy.who.includes(e.kind))add(true,`SINERGIA: ${sy.n}`,sy.d,'#ffd23f');
   add(e.level>1,`NÍVEL ${e.level}`,`+${Math.round((e.lvMul-1)*100)}% de dano e +${Math.round(((e.maxHp/HEROES[e.kind].hp)-1)*100)}% de vida pelo nível.`,'#a05cff');
  }else{
   add(e.para>0,`PARALISADO · ${e.para}T`,'Perde a vez enquanto a borda marrom estiver nele.','#a0612e');
@@ -2942,9 +2987,9 @@ function endGame(win,quit){if(G.over)return;hideInfo();SND.music(false);setTimeo
   document.getElementById('overXP').innerHTML=[...G.heroes,...G.grave.filter(h=>!G.heroes.includes(h))].map(h=>`<span>${h.name.toUpperCase()} · ${h.dead?'CAIU':Math.ceil(h.hp)+'/'+h.maxHp}</span>`).join('');
   const ag=document.getElementById('again'),nx=document.getElementById('nextF');nx.hidden=false;nx.firstElementChild.textContent='REPETIR TESTE ▶';ag.classList.remove('main');ag.firstElementChild.textContent='AJUSTAR TESTE';
   setTimeout(()=>{document.getElementById('over').hidden=false},800);log(win?'Vitória no teste!':'Fim do teste.');updateUI();return}
- const fl=G.floor,prevS=starsOf(fl),done=win?OBJS.map((o,i)=>({o,i})).filter(q=>objOk(q.o.id)):[],xp=awardXP(win,1+done.reduce((a,q)=>a+q.o.x,0));
+ const fl=G.floor,prevS=starsOf(fl),done=win?OBJS.map((o,i)=>({o,i})).filter(q=>objOk(q.o.id)):[],xp=awardXP(win,(1+done.reduce((a,q)=>a+q.o.x,0))*(1+(G.synXp||0))*(G.rule?1.3:1));
  if(win){TOWER.best=Math.max(TOWER.best,fl);TOWER.floor=fl+1}else{TOWER.best=Math.max(TOWER.best,fl-1);TOWER.floor=Math.max(1,Math.floor((fl-1)/10)*10+1)}saveTower();
- const c0=win?(isBossFloor(fl)?2:1)*(15+4*fl):4+fl,bon=done.map(q=>{const first=!(prevS&(1<<q.i));return{...q,first,c:Math.round(c0*q.o.k*(first?2:1))}}),coins=c0+bon.reduce((a,q)=>a+q.c,0);PROG.coins+=coins;
+ const c0=Math.round((win?(isBossFloor(fl)?2:1)*(15+4*fl):4+fl)*(win&&G.rule?1.5:1)),bon=done.map(q=>{const first=!(prevS&(1<<q.i));return{...q,first,c:Math.round(c0*q.o.k*(first?2:1))}}),coins=c0+bon.reduce((a,q)=>a+q.c,0);PROG.coins+=coins;
  if(done.length){PROG.stars=PROG.stars||{};PROG.stars[fl]=prevS|done.reduce((a,q)=>a|(1<<q.i),0)}const newU=[];if(win&&G.heroBoss&&unlock(G.heroBoss))newU.push(G.heroBoss);newU.push(...checkEvos());saveProg();
  document.getElementById('overS').textContent=win?`ANDAR ${fl} CONCLUÍDO NA RODADA ${G.round}`:(quit?`VOCÊ DESISTIU NO ANDAR ${fl}`:`SEU TIME CAIU NO ANDAR ${fl}`)+` · VOCÊ VOLTA PARA O ANDAR ${TOWER.floor}`;
  document.getElementById('overXP').innerHTML=newU.map(k=>`<span class="new">NOVO PERSONAGEM: ${HEROES[k].name.toUpperCase()}!</span>`).join('')+(win?OBJS.map((o,i)=>{const q=bon.find(x=>x.i===i);return q?`<span class="star">★ ${o.n} · +${q.c} MOEDAS${q.first?' (1ª VEZ x2)':''} · +${Math.round(o.x*100)}% XP</span>`:`<span class="nostar">☆ ${o.n}</span>`}).join(''):'')+`<span class="coin">+${coins} MOEDAS · TOTAL ${PROG.coins}</span>`+xp.map(o=>`<span class="${o.a>o.b?'up':''}">${HEROES[o.k].name.toUpperCase()} +${o.g} XP${o.a>o.b?` · LV ${o.a}!`:''}</span>`).join('');
@@ -3029,7 +3074,7 @@ restartBtn.addEventListener('click',()=>{if(restartBtn.disabled||!G||G.phase!=='
  resetQuit();log('Você desistiu da batalha.');endGame(false,true)});
 document.getElementById('again').addEventListener('click',()=>{if(G&&G.test)openTest();else openFormation()});
 // próximo andar direto, com a mesma equipe
-function nextFloor(){if(!G||!G.over)return;if(G.test){document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle();return}document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle()}
+function nextFloor(){if(!G||!G.over)return;if(G.test){document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle();return}if(!ruleOk(TEAM,TOWER.floor)){openFormation();const r=ruleOf(TOWER.floor);fmsg.textContent=`O andar ${TOWER.floor} tem regra: ${r.d}. Ajuste a equipe para continuar.`;fmsg.classList.add('warn');return}document.getElementById('over').hidden=true;SND.confirm();lastSig='';newBattle()}
 document.getElementById('nextF').addEventListener('click',nextFloor);
 // barras de volume: o botão ao lado silencia; mexer na barra tira do mudo
 const sndBtn=document.getElementById('snd'),sfxIn=document.getElementById('sfxVol'),sfxOut=document.getElementById('sfxOut');
@@ -3060,8 +3105,8 @@ const fullMain=()=>draft.slice(0,4).some(Boolean)&&!badMain(draft);
 const unlEl=document.getElementById('unl'),unlQ=[];
 const UBG={comum:'linear-gradient(135deg,#d8dbe0,#ffffff)',raro:'linear-gradient(135deg,#c8961e,#fff1b0,#d9a92a)',super:'linear-gradient(135deg,#8e97a4,#ffffff,#bfeaff,#ffd2f1)',ultimate:'linear-gradient(135deg,#7b2cff,#e6c8ff,#a855ff)'};
 function showUnlock(list){unlQ.push(...list);if(unlEl.hidden)nextUnlock()}
-function nextUnlock(){const k=unlQ.shift();if(!k){unlEl.hidden=true;return}const h=HEROES[k],cd=unlEl.querySelector('.ucard');
- document.getElementById('uName').textContent=h.name.toUpperCase();document.getElementById('uHow').textContent=`${RARITY[h.rarity].star}${RARITY[h.rarity].n} · classe ${CLS[h.cls].n} · já pode entrar na equipe`;
+function nextUnlock(){const it=unlQ.shift();if(!it){unlEl.hidden=true;return}const k=typeof it==='string'?it:it.k,h=HEROES[k],cd=unlEl.querySelector('.ucard');unlEl.querySelector('small').textContent=it.title||'NOVO PERSONAGEM!';
+ document.getElementById('uName').textContent=h.name.toUpperCase();document.getElementById('uHow').textContent=it.how||`${RARITY[h.rarity].star}${RARITY[h.rarity].n} · classe ${CLS[h.cls].n} · já pode entrar na equipe`;
  cd.style.setProperty('--ub',UBG[h.rarity]||UBG.comum);drawPortrait({kind:k},unlEl.querySelector('canvas'));cd.style.animation='none';void cd.offsetWidth;cd.style.animation='';unlEl.hidden=false;SND.chime();
  if(AUTO){const kk=k;setTimeout(()=>{if(!unlEl.hidden&&document.getElementById('uName').textContent===HEROES[kk].name.toUpperCase())nextUnlock()},2300)}}
 document.getElementById('uOk').addEventListener('click',()=>{SND.click();nextUnlock()});
@@ -3111,7 +3156,7 @@ function renderTeamMeter(){const ks=draft.filter(Boolean),avg=teamPower(draft),f
 function renderFormation(){
  renderTeamMeter();
  {const f=TOWER.floor;document.getElementById('fFloor').textContent=`PRÓXIMO: ANDAR ${f}${floorTag(f)} · ${starTxt(f)}${TOWER.best?` · RECORDE ${TOWER.best}`:''}`;document.getElementById('fCoins').textContent=`MOEDAS ${PROG.coins}`;
-  const top=Math.max(1,TOWER.best+1),fs=document.getElementById('fFl'),ssig=top+JSON.stringify(PROG.stars||{});if(fs.dataset.sig!==ssig){fs.dataset.sig=ssig;fs.innerHTML=Array.from({length:top},(_,i)=>{const n=i+1,hb=isBossFloor(n)&&bossHeroAt(n);return `<option value="${n}">ANDAR ${n}${hb?' · '+HEROES[hb].name.toUpperCase():isBossFloor(n)?' · CHEFÃO':''}${n===top&&TOWER.best?' · NOVO':' · '+starTxt(n)}</option>`}).join('')}fs.value=String(f);document.getElementById('flPrev').disabled=f<=1;document.getElementById('flNext').disabled=f>=top}
+  const top=Math.max(1,TOWER.best+1),fs=document.getElementById('fFl'),ssig=top+JSON.stringify(PROG.stars||{});if(fs.dataset.sig!==ssig){fs.dataset.sig=ssig;fs.innerHTML=Array.from({length:top},(_,i)=>{const n=i+1,hb=isBossFloor(n)&&bossHeroAt(n);return `<option value="${n}">ANDAR ${n}${hb?' · '+HEROES[hb].name.toUpperCase():isBossFloor(n)?' · CHEFÃO':ruleOf(n)?' · REGRA':''}${n===top&&TOWER.best?' · NOVO':' · '+starTxt(n)}</option>`}).join('')}fs.value=String(f);document.getElementById('flPrev').disabled=f<=1;document.getElementById('flNext').disabled=f>=top}
  if(FILT.o==='team')applyRosterView();
  slotsEl.innerHTML=[0,1,2,3,4].map(slotHTML).join('');
  slotsEl.querySelectorAll('.slot').forEach(el=>{const k=draft[+el.dataset.s];if(k)drawPortrait({kind:k},el.querySelector('canvas'))});
@@ -3121,7 +3166,8 @@ function renderFormation(){
   card.classList.toggle('in',i>=0);b.className='badge'+(i===4?' res':i<0?' out':'');
   b.firstElementChild.textContent=i<0?'FORA DA EQUIPE':i===4?(copyOf(draft,k)?`RESERVA · SÓ NO LUGAR DE ${HEROES[copyOf(draft,k)].name.toUpperCase()}`:'RESERVA'):`TITULAR · POSIÇÃO ${i+1}`;
   card.setAttribute('aria-label',`${HEROES[k].name}: ${b.textContent}`)}
- syncDet();const save=document.getElementById('fSave');save.disabled=!fullMain();fmsg.classList.remove('warn');
+ syncDet();renderSyn();const rOk=ruleOk(draft,TOWER.floor),rl=ruleOf(TOWER.floor);const save=document.getElementById('fSave');save.disabled=!fullMain()||!rOk;fmsg.classList.remove('warn');
+ if(fullMain()&&!rOk){fmsg.textContent=`O andar ${TOWER.floor} tem regra: ${rl.d}. Ajuste a equipe para começar.`;fmsg.classList.add('warn');return}
  fmsg.textContent=!fullMain()?'Coloque pelo menos 1 personagem como titular (posições 1 a 4). '+(fSel!=null&&fSel<4?`Escolha quem vai na ${SLOT_NAMES[fSel].toLowerCase()}.`:'Toque numa posição de titular.')
   :fSel!=null?`Escolha quem vai na ${SLOT_NAMES[fSel].toLowerCase()}. Tocar em alguém da equipe troca os dois de lugar.`:'Monte a equipe e comece a batalha. Durante a luta ela não pode ser trocada. Toque numa posição e depois num personagem para trocar; a posição 1 fica mais perto dos inimigos.'}
 const tgtTxt={self:'ele mesmo',enemy:'1 inimigo',allEnemies:'todos os inimigos',ally:'1 aliado',allAllies:'todo o time'};
@@ -3199,6 +3245,23 @@ document.getElementById('fSave').addEventListener('click',()=>{if(fullMain())clo
  rb.addEventListener('click',()=>{if(!arm){SND.cancel();rb.firstElementChild.textContent='TOCAR DE NOVO PARA CONFIRMAR';rb.classList.add('arm');arm=setTimeout(reset,3000);return}
   reset();XP={};saveXP();PROG={unl:[],coins:0};saveProg();TOWER={floor:1,best:0};saveTower();TEAM=STARTERS.slice();draft=TEAM.slice();fSel=null;try{localStorage.setItem('mi-rpg-team',JSON.stringify(TEAM))}catch(e){}SND.confirm();buildRoster();renderFormation();fmsg.textContent='Progresso reiniciado: você voltou ao andar 1 só com os 5 personagens iniciais, todos no nível 1 e sem moedas.';fmsg.classList.add('warn')})}
 
+// ---------- painel de sinergias na formação ----------
+function renderSyn(){const el=document.getElementById('synp'),ks=draft.slice(0,4).filter(Boolean),on=synOf(ks);
+ el.innerHTML=`<b><span>SINERGIAS</span></b>`+(on.length?on.map(s=>`<span class="sy" title="${s.d}"><span>${s.n}</span></span>`).join(''):`<span class="none">nenhuma ativa</span>`)+
+  `<details><summary>VER TODAS AS SINERGIAS</summary><ul>${SYN.map(s=>`<li class="${on.includes(s)?'on':''}">${on.includes(s)?'✓ ':''}<b>${s.n}</b>: ${s.d}</li>`).join('')}</ul></details>`;
+ const dt=el.querySelector('details');if(renderSyn.open)dt.open=true;dt.addEventListener('toggle',()=>renderSyn.open=dt.open)}
+// ---------- loja de pacotes ----------
+const packsEl=document.getElementById('packs');const PKB={b:'linear-gradient(135deg,#d8dbe0,#ffffff)',r:'linear-gradient(135deg,#c8961e,#fff1b0)',l:'linear-gradient(135deg,#a855ff,#f0d9ff)'};let packArm=null,packT=0;
+function renderPacks(){document.getElementById('pCoins').textContent=`MOEDAS ${PROG.coins}`;
+ document.getElementById('pList').innerHTML=PACKS.map(P=>`<div class="pk" style="--pkb:${PKB[P.id]}"><b>${P.n}</b><small>${Object.entries(P.ch).map(([r,v])=>`${RARITY[r].n}: ${Math.round(v*100)}%`).join('<br>')}</small><button class="btn main" type="button" data-pk="${P.id}"${PROG.coins<P.p?' disabled':''}><span>${packArm===P.id?'TOCAR DE NOVO':`ABRIR · ${P.p} MOEDAS`}</span></button></div>`).join('')}
+function openPacks(){packArm=null;renderPacks();document.getElementById('pMsg').classList.remove('warn');packsEl.hidden=false;SND.pick()}
+document.getElementById('fPacks').addEventListener('click',openPacks);
+document.getElementById('pClose').addEventListener('click',()=>{packsEl.hidden=true;SND.click()});
+packsEl.addEventListener('click',ev=>{if(ev.target===packsEl){packsEl.hidden=true;return}const b=ev.target.closest('[data-pk]');if(!b||b.disabled)return;const P=PACKS.find(x=>x.id===b.dataset.pk);
+ if(packArm!==P.id){packArm=P.id;clearTimeout(packT);packT=setTimeout(()=>{packArm=null;renderPacks()},3000);SND.pick();renderPacks();return}
+ packArm=null;if(PROG.coins<P.p)return;PROG.coins-=P.p;const res=rollPack(P);const ev2=checkEvos();saveProg();SND.confirm();buildRoster();renderFormation();renderPacks();
+ const h=HEROES[res.k];document.getElementById('pMsg').textContent=res.dup?`Veio ${h.name} de novo: ${res.max?'ele já está no nível máximo, então você recebeu parte das moedas de volta':'ele subiu para o nível '+lvOf(res.k)}.`:`Você conseguiu ${h.name}!`;
+ showUnlock([{k:res.k,title:res.dup?'REPETIDO!':'NOVO PERSONAGEM!',how:res.dup?(res.max?'Já estava no nível máximo: parte das moedas voltou':`Virou treino: subiu para o LV ${lvOf(res.k)}`):undefined},...ev2])});
 /* =================== MODO TESTE (não salva nada) =================== */
 let TESTCFG=null;const testEl=document.getElementById('testv');
 const TPOS=['POSIÇÃO 1','POSIÇÃO 2','POSIÇÃO 3','POSIÇÃO 4','RESERVA'];
@@ -3241,7 +3304,7 @@ new MutationObserver(syncTheme).observe(rootEl,{attributes:true,attributeFilter:
 themeBtn.addEventListener('click',()=>{setTheme(!isDark(),true);SND.click()});
 
 /* =================== AUTO (os heróis escolhem sozinhos) =================== */
-function expDmg(h,s,t){let d=(s.copyHit?t.atk*.5:(s.power||0))*mult(h,t)*sibMult(h)*(h.lvMul||1)*(h.buffs.focus>0&&!s.special?2:1);if(h.buffs.atk>0)d*=1.4;if(h.buffs.armor>0)d*=1.5;if(t.defDown>0)d*=1.35;if(h.buffs.charged&&s.id!=='potencia')d*=2;if(s.execute&&t.hp<t.maxHp*.5)d*=2;return d}
+function expDmg(h,s,t){let d=(s.copyHit?t.atk*.5:(s.power||0))*(1+(h.synAtk||0))*mult(h,t)*sibMult(h)*(h.lvMul||1)*(h.buffs.focus>0&&!s.special?2:1);if(h.buffs.atk>0)d*=1.4;if(h.buffs.armor>0)d*=1.5;if(t.defDown>0)d*=1.35;if(h.buffs.charged&&s.id!=='potencia')d*=2;if(s.execute&&t.hp<t.maxHp*.5)d*=2;return d}
 // força de ataque de um herói (para decidir em quem vale a pena colocar bônus)
 function atkPow(h){const en=Math.max(1,aliveEnemies().length);return Math.max(100,...h.skills.filter(s=>s.power).map(s=>s.power*(s.target==='allEnemies'?en*.8:1)*(s.special?.6:1)))}
 function aiChoose(h,taken){
