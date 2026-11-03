@@ -2974,7 +2974,7 @@ function effectsOf(e){const L=[],add=(c,n,d,col)=>{if(c)L.push({n,d,col})},b=e.b
 const infoEl=document.getElementById('info');let infoFor=null;
 function showInfo(e){if(!e){hideInfo();return}infoFor=e;const T=e.side==='enemy'?(e.heroBoss?{n:'Chefão',ranged:false,desc:`Luta com os golpes do ${e.name}: ${HEROES[e.kind].skills.map(x=>x.name).join(', ')}. O especial vem a cada 3 turnos. Vença para liberar o personagem.`}:ETYPES[e.type]):null,ef=effectsOf(e);
  infoEl.innerHTML=`<button type="button" class="ix" aria-label="Fechar">✕</button><h3>${e.name.toUpperCase()}</h3>
- <div class="isub">Classe ${CLS[e.cls].n} · fraco contra ${CLS[e.weak].n} · vida ${Math.ceil(e.hp)}/${e.maxHp}${e.side==='enemy'?` · ataque ${e.atk}`:` · LV ${e.level}`}</div>
+ <div class="isub">Classe ${CLS[e.cls].n} · fraco contra ${CLS[e.weak].n} ${e.side==='enemy'&&!e.boss?'':` · vida ${Math.ceil(e.hp)}/${e.maxHp}`}${e.side==='enemy'?` · ataque ${e.atk}`:` · LV ${e.level}`}</div>
  ${T?`<div><b>${T.n.toUpperCase()}${T.ranged?' · ATIRA DE LONGE':' · CORPO A CORPO'}</b><br>${T.desc}</div>`:''}
  <ul>${ef.length?ef.map(x=>`<li style="--c:${x.col}"><b>${x.n}</b>${x.d}</li>`).join(''):'<li><b>SEM EFEITOS</b>Nenhum efeito ativo agora.</li>'}</ul>`;
  infoEl.hidden=false;infoEl.querySelector('.ix').onclick=hideInfo}
@@ -3491,7 +3491,7 @@ function render(t){
   const badges=new Map();G.order.forEach((id,i)=>{const pl=G.plans.get(id);if(!pl||!pl.target)return;const h=G.heroes.find(x=>x.id===id);if(!h)return;const a=badges.get(pl.target)||[];a.push({n:i+1,c:FXC[h.kind][0]});badges.set(pl.target,a)});
   for(const e of G.enemies){if(e.dead||e.alpha<.5)continue;const by=HY(e)-TOPE(e)-30;
    let[x,y]=T(HX(e),by-10);if(!NARROW){const nm=(e.label||e.name).toUpperCase();ctx.font=`italic bold ${Math.round(Math.max(4*s,9*DPR))}px "Courier New",monospace`;ctx.lineWidth=Math.max(3,s*1.2);ctx.strokeStyle='#000';ctx.strokeText(nm,x,y);ctx.fillStyle=CLS[e.cls].c;ctx.fillText(nm,x,y);}
-   [x,y]=T(HX(e),by+11);ctx.font=`bold ${Math.round(Math.max(3.4*s,8*DPR))}px "Courier New",monospace`;ctx.lineWidth=Math.max(2,s*.9);const hp=(NARROW?String(Math.ceil(e.hp)):`${Math.ceil(e.hp)}/${e.maxHp}`);ctx.strokeText(hp,x,y);ctx.fillStyle='#fff';ctx.fillText(hp,x,y);
+   [x,y]=T(HX(e),by+11);ctx.font=`bold ${Math.round(Math.max(3.4*s,8*DPR))}px "Courier New",monospace`;ctx.lineWidth=Math.max(2,s*.9);if(e.boss){const hp=(NARROW?String(Math.ceil(e.hp)):`${Math.ceil(e.hp)}/${e.maxHp}`);ctx.strokeText(hp,x,y);ctx.fillStyle='#fff';ctx.fillText(hp,x,y)}
    const sts=[[e.para>0,`PARALISADO ${e.para}T`,'#c98a4b'],[e.stun>0,'PRESO','#2ee87a'],[e.consc,e.consc&&`IMÓVEL ${e.consc.turns}T`,'#ffc61a'],[e.dizzy>0,`${e.dizzyTxt||'CONFUSO'} ${e.dizzy}T`,'#ffe04a'],[e.ctrl,e.ctrl&&`CONTROLADO ${e.ctrl.turns}T`,'#e8edf3'],[e.poison,e.poison&&`VENENO ${e.poison.turns}T`,'#7cff5a'],[e.atkDown>0,`ENFRAQUECIDO ${e.atkDown}T`,'#9fd0ff'],[e.eshield,e.eshield&&`ESCUDO ${e.eshield.hp}`,'#7fd0ff']].filter(q=>q[0]);
    sts.forEach((q,k)=>{[x,y]=T(HX(e),FLOOR+30+k*26);ctx.font=`italic bold ${Math.round(Math.max(3.4*s,9*DPR))}px "Courier New",monospace`;ctx.lineWidth=Math.max(3,s);ctx.strokeStyle='#000';ctx.strokeText(q[1],x,y);ctx.fillStyle=q[2];ctx.fillText(q[1],x,y)})}
   for(const[tg,list]of badges){if(tg.dead)continue;const top=tg.side==='enemy'?TOPE(tg)+104:TOPE(tg)+12;const[cx,cy]=T(HX(tg),HY(tg)-top);const bs=Math.round(Math.max(6*s,12*DPR)),gap=Math.round(Math.max(1.5*s,3*DPR));let x0=cx-(list.length*bs+(list.length-1)*gap)/2;
