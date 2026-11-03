@@ -379,6 +379,19 @@ body.land{margin:0;padding-block:6px;padding-left:max(10px,env(safe-area-inset-l
 .land .synp .sy,.land .synp>b{font-size:9px;padding:2px 7px}.land .pbox{padding:8px;gap:6px}.land .plist{grid-template-columns:repeat(3,minmax(0,1fr))}
 .ccard .chead .asc{font:900 11px var(--mono);color:#ffd23f;background:#000;padding:1px 6px;transform:skewX(-14deg);letter-spacing:.02em}.land .ccard .chead .asc{font-size:8px}
 .pmsg.pity{color:var(--text);font-style:italic}
+/* tablet deitado: mesmo layout lado a lado, em tamanho maior */
+.landL .battle{grid-template-columns:minmax(0,1fr) 300px;gap:8px 10px}
+.landL h1 b{font-size:18px;padding:4px 14px}.landL .btn{font-size:12px;padding:6px 12px}.landL .round{font-size:12px;padding:4px 10px}
+.landL .vol button{font-size:11px;padding:3px 7px}
+.landL .cbar{padding:6px 7px 7px;gap:5px}.landL #who .tagb{font-size:11px;padding:3px 10px}.landL .cbar .ctrl{gap:7px}.landL .cbar .btn{font-size:11px;padding:7px 4px}.landL #confirm{font-size:11px}
+.landL .team{gap:6px}.landL .team .card{grid-template-columns:42px minmax(0,1fr);gap:8px;padding:5px 30px 6px 6px}
+.landL .pf{width:40px;height:40px}.landL .pf canvas{width:38px;height:38px}
+.landL .nm{font-size:12px;padding:1px 8px}.landL .lv{font-size:9px}.landL .lv b{font-size:12px}.landL .cls{font-size:9px;padding:0 6px}
+.landL .team .bl{display:flex;font-size:8px;margin-bottom:-3px;line-height:1.1}.landL .team .bar{height:6px}.landL .team .info{gap:1px}.landL .team .card{padding-top:4px;padding-bottom:4px}.landL .plan{font-size:10px;padding:1px 6px}.landL .tag{font-size:10px;line-height:14px}
+.landL .ibtn{width:22px;height:22px;font-size:12px}.landL .turnc b{font-size:20px}.landL .objs{top:44px}.landL .objs span{font-size:10px}.landL .objs b{font-size:9px}
+.landL .fbtn{padding:3px 10px 4px;max-width:180px}.landL .fn{font-size:12px}.landL .fc{font-size:10px}
+.landL .fhead .tagb{font-size:12px}.landL .fhead #fmsg{font-size:12px}.landL .slot .sl small{font-size:9px}.landL .slot .sl b{font-size:12px}.landL .slot .sl em{font-size:10px}
+.landL .slot{grid-template-columns:40px minmax(0,1fr)}.landL .slot .pf{width:38px;height:38px}.landL .slot .pf canvas{width:36px;height:36px}.landL .roster{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
 </style>
 
 <div class="cdet" id="cdet" hidden role="dialog" aria-label="Detalhes do personagem"><div class="cdbox"><div class="cdcard"></div><p class="cdmsg" id="cdMsg" hidden></p><div class="ctrl"><button class="btn" id="cdClose" type="button"><span>FECHAR</span></button><button class="btn" id="cdTrain" type="button"><span>TREINAR</span></button><button class="btn main" id="cdPick" type="button"><span>COLOCAR NA EQUIPE</span></button></div></div></div>
@@ -452,7 +465,8 @@ const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const wc=document.createElement('canvas');wc.width=LW;wc.height=LH;const w=wc.getContext('2d');
 let DPR=1,LAND=false;function resize(){DPR=Math.min(2,devicePixelRatio||1);
  // celular deitado: o campo ocupa a altura toda que sobra e mostra mais céu
- LAND=innerWidth>innerHeight&&innerHeight<=540;document.body.classList.toggle('land',LAND);
+ // celular deitado (tela baixa) ou tablet deitado (tela de toque): campo à esquerda, time à direita
+ const coarse=matchMedia('(pointer:coarse)').matches;LAND=innerWidth>innerHeight&&(innerHeight<=540||(coarse&&innerHeight<=1100));document.body.classList.toggle('land',LAND);document.body.classList.toggle('landL',LAND&&innerHeight>540);
  if(LAND){const hd=document.querySelector('header'),av=Math.max(200,innerHeight-(hd.offsetTop+hd.offsetHeight)-6-7);document.body.style.setProperty('--avail',av+'px');
   const w=cv.parentElement.clientWidth||600;NARROW=false;LH=Math.max(110,Math.min(300,Math.round(LW*(av-8)/w)));VH=LH*PX;wc.height=LH;cv.style.aspectRatio=`${LW}/${LH}`;
   const oy=BASECAM.y;BASECAM.y=Math.round(FLOOR-.88*VH+VH/2);if(cam.y===oy||cam.y===undefined)cam.y=BASECAM.y;
